@@ -15,7 +15,7 @@ Exclusive screens via AppNav:
 - **Connect** — `#/connect`
 - **Settings** — `#/settings/...` (RPG toggles also under Settings → Extensions)
 
-RPG Companion is vendored as core under `public/scripts/rpg/` (see `NOTICE.md`).
+RPG tracker lives under `public/scripts/rpg/` (from SpicyMarinara’s RPG Companion, AGPL-3.0).
 
 ## Run
 

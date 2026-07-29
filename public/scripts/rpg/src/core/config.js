@@ -1,6 +1,6 @@
 /**
- * Core Configuration Module
- * EpicTavern core RPG tracker (vendored from SpicyMarinara RPG Companion)
+ * RPG tracker settings / paths.
+ * Based on SpicyMarinara/rpg-companion-sillytavern (AGPL-3.0).
  */
 
 /** @typedef {import('../types/inventory.js').InventoryV2} InventoryV2 */

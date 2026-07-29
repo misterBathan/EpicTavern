@@ -286,6 +286,7 @@ import {
     getCurrentScreen,
 } from './scripts/app-nav.js';
 import { initRpgCompanion } from './scripts/rpg/index.js';
+import { initChatTopBar } from './scripts/chat-top-bar/index.js';
 import { initEtSendFix } from './scripts/et-send-fix.js';
 import { initAccessibility } from './scripts/a11y.js';
 import { applyStreamFadeIn } from './scripts/util/stream-fadein.js';
@@ -800,6 +801,11 @@ async function firstLoadInit() {
         await initRpgCompanion();
     } catch (error) {
         console.error('[EpicTavern] RPG init failed:', error);
+    }
+    try {
+        await initChatTopBar();
+    } catch (error) {
+        console.error('[EpicTavern] Chat Top Bar init failed:', error);
     }
     try {
         initEtSendFix();

@@ -1,0 +1,17 @@
+/**
+ * Chat top bar layout under AppNav (Chat screen only).
+ */
+
+@import url('../scripts/chat-top-bar/style.css');
+
+body.et-shell:not([data-et-screen='chat']) #etChatTopBar,
+body.et-shell:not([data-et-screen='chat']) #etChatTopBarConnectionProfiles,
+body.et-shell:not([data-et-screen='chat']) #etChatTopBarSideBar {
+    display: none !important;
+}
+
+body.et-shell[data-et-screen='chat'] #etChatTopBarSideBar {
+    top: var(--et-app-nav-height) !important;
+    height: calc(100dvh - var(--et-app-nav-height)) !important;
+    z-index: 1300;
+}

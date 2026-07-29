@@ -1,0 +1,242 @@
+body #sheld.flexPatch {
+    display: flex;
+    flex-direction: column;
+}
+
+body #sheld.flexPatch #chat {
+    flex-grow: 1;
+}
+
+#etChatTopBarToggleConnectionProfiles.active,
+#etChatTopBarToggleSidebar.active {
+    filter: brightness(150%);
+}
+
+#etChatTopBarConnectionProfiles {
+    display: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    border: 1px solid var(--SmartThemeBorderColor);
+    background-color: var(--SmartThemeBlurTintColor);
+    backdrop-filter: blur(var(--SmartThemeBlurStrength));
+    height: calc(var(--bottomFormBlockSize) * 0.75);
+    padding: 0 10px;
+    gap: 10px;
+    margin-top: -1px;
+    font-size: calc(var(--mainFontSize) * 0.9);
+    border-radius: 0 0 10px 10px;
+}
+
+#etChatTopBarSideBar {
+    top: 0;
+    display: none;
+}
+
+#etChatTopBarSideBar.visible,
+#etChatTopBarConnectionProfiles.visible {
+    display: flex;
+}
+
+body.reduced-motion #etChatTopBarSideBar {
+    transition: none;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 2px;
+    margin-top: 1.5em;
+    gap: 2px;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarLoader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem {
+    display: flex;
+    flex-direction: column;
+    transition: filter 0.2s;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    gap: 2px;
+    border: 1px solid var(--SmartThemeBorderColor);
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem.selected {
+    background-color: var(--cobalt30a);
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem:hover {
+    background-color: var(--white30a);
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatNameContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: calc(var(--mainFontSize) * 0.90);
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatNameContainer .chatName {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatMessageContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    font-size: calc(var(--mainFontSize) * 0.8);
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatMessageContainer .chatMessage {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatStats {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 5px;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatStats .counterBlock {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 5px;
+}
+
+#etChatTopBarSideBar #etChatTopBarSideBarContainer .sideBarItem .chatStats .counterBlock::after {
+    content: "|";
+    color: var(--SmartThemeBorderColor);
+    font-size: calc(var(--mainFontSize) * 0.85);
+}
+
+#etChatTopBar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    align-content: center;
+    align-items: baseline;
+    width: 100%;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 10px 10px 0 0;
+    background-color: var(--SmartThemeBlurTintColor);
+    backdrop-filter: blur(var(--SmartThemeBlurStrength));
+    height: var(--bottomFormBlockSize);
+    padding: 0 10px;
+    gap: 10px;
+    font-size: calc(var(--mainFontSize) * 0.9);
+}
+
+#etChatTopBar .not-in-chat {
+    opacity: 0.5;
+}
+
+body.movingUI #etChatTopBar {
+    padding-right: 30px;
+}
+
+#etChatTopBarConnectionProfilesStatus {
+    flex: 1;
+    opacity: 0.8;
+    text-align: right;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-size: calc(var(--mainFontSize)* 0.85);
+}
+
+#etChatTopBarConnectionProfilesStatus~.null-icon {
+    visibility: hidden;
+}
+
+#etChatTopBarConnectionProfilesIcon,
+#etChatTopBarConnectionProfilesStatus~.icon-svg {
+    opacity: 0.8;
+}
+
+#etChatTopBarConnectionProfilesStatus.offline {
+    font-style: italic;
+    opacity: 0.5;
+}
+
+#etChatTopBarConnectionProfilesSelect {
+    flex: 1;
+    cursor: pointer;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    opacity: 0.8;
+    background: none;
+    border: none;
+    background-image: url('/img/down-arrow.svg');
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 8px 5px;
+    margin: 0;
+    font-size: calc(var(--mainFontSize)* 0.9);
+    padding-right: 20px;
+}
+
+#etChatTopBarChatName {
+    flex: 1;
+    cursor: pointer;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    opacity: 0.8;
+    background: none;
+    border: none;
+    background-image: url('/img/down-arrow.svg');
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 8px 5px;
+    padding-right: 20px;
+}
+
+#etChatTopBarSearchInput {
+    background-color: transparent;
+    font-size: calc(var(--mainFontSize) * 0.9);
+    opacity: 0.8;
+    max-width: calc(var(--sheldWidth) * 0.2);
+    flex-grow: 1;
+}
+
+@media screen and (max-width: 1000px) {
+    #etChatTopBarSearchInput {
+        max-width: calc(var(--sheldWidth) * 0.5);
+    }
+}
+
+#etChatTopBarSearchInput:placeholder-shown {
+    font-style: italic;
+    opacity: 0.5;
+    border-color: transparent;
+}

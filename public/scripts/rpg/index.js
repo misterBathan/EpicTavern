@@ -1,3 +1,8 @@
+/**
+ * RPG tracker (panel / journal / generation hooks).
+ * Based on SpicyMarinara/rpg-companion-sillytavern (AGPL-3.0).
+ */
+
 import { getContext, extension_settings as st_extension_settings } from '../extensions.js';
 import { eventSource, event_types, substituteParams, chat, saveSettingsDebounced, chat_metadata, saveChatDebounced, user_avatar, getThumbnailUrl, characters, this_chid, extension_prompt_types, extension_prompt_roles, setExtensionPrompt, reloadCurrentChat, Generate, getRequestHeaders } from '../../script.js';
 import { selected_group, getGroupMembers } from '../group-chats.js';
@@ -1409,8 +1414,7 @@ async function initUI() {
 //  onMessageSwiped, updatePersonaAvatar, clearExtensionPrompts)
 
 /**
- * Main initialization for EpicTavern core RPG (default-on).
- * Call once after the app shell is ready.
+ * Init RPG tracker after the app shell is ready.
  */
 export async function initRpgCompanion() {
     try {
