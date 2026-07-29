@@ -1,0 +1,409 @@
+/**
+ * EpicTavern shell: AppNav + exclusive screens (Phase 1–2).
+ */
+
+:root {
+    --et-app-nav-height: 3.25rem;
+    --et-settings-tabs-height: 2.75rem;
+    --et-ink: #12100e;
+    --et-ink-elevated: #1c1814;
+    --et-brass: #c4a35a;
+    --et-brass-soft: #e0c989;
+    --et-parchment: #e8dfd0;
+    --et-parchment-muted: #b9ae9c;
+    --et-edge: rgba(196, 163, 90, 0.28);
+}
+
+/* ---------- AppNav ---------- */
+
+#et-app-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--et-app-nav-height);
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 0.85rem;
+    box-sizing: border-box;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.96), rgba(18, 16, 14, 0.92)),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 11px,
+            rgba(196, 163, 90, 0.03) 11px,
+            rgba(196, 163, 90, 0.03) 12px
+        );
+    border-bottom: 1px solid var(--et-edge);
+    color: var(--et-parchment);
+    font-family: 'Noto Sans', sans-serif;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.et-nav-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    user-select: none;
+    min-width: max-content;
+    padding: 0.2rem 0.35rem;
+    border-radius: 0.35rem;
+}
+
+.et-nav-brand:hover .et-nav-brand-text {
+    color: var(--et-brass-soft);
+}
+
+.et-nav-brand-mark {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 0.15rem;
+    background: radial-gradient(circle at 30% 30%, var(--et-brass-soft), var(--et-brass) 55%, #7a5c28);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 0 12px rgba(196, 163, 90, 0.35);
+}
+
+.et-nav-brand-text {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 1.05rem;
+    color: var(--et-parchment);
+    transition: color var(--animation-duration, 0.2s) ease;
+}
+
+.et-nav-items {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.et-nav-item {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--et-parchment-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition:
+        color var(--animation-duration, 0.2s) ease,
+        background var(--animation-duration, 0.2s) ease,
+        border-color var(--animation-duration, 0.2s) ease;
+}
+
+.et-nav-item i {
+    font-size: 0.95rem;
+}
+
+.et-nav-item:hover {
+    color: var(--et-parchment);
+    background: rgba(196, 163, 90, 0.08);
+}
+
+.et-nav-item.is-active {
+    color: var(--et-ink);
+    background: linear-gradient(180deg, var(--et-brass-soft), var(--et-brass));
+    border-color: rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+}
+
+.et-nav-meta {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.et-nav-version,
+#et-app-nav #version_display {
+    padding: 0;
+    opacity: 0.85;
+    color: var(--et-parchment-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: min(28vw, 22rem);
+}
+
+.et-nav-phase {
+    flex-shrink: 0;
+}
+
+.et-nav-phase-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--et-edge);
+    color: var(--et-parchment-muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ---------- Settings section tabs ---------- */
+
+#et-settings-tabs {
+    display: none;
+    position: fixed;
+    top: var(--et-app-nav-height);
+    left: 0;
+    right: 0;
+    height: var(--et-settings-tabs-height);
+    z-index: 4990;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0 clamp(1rem, 6vw, 4rem);
+    box-sizing: border-box;
+    background: rgba(18, 16, 14, 0.94);
+    border-bottom: 1px solid var(--et-edge);
+    overflow-x: auto;
+}
+
+body.et-shell[data-et-screen='settings'] #et-settings-tabs {
+    display: flex;
+}
+
+.et-settings-tab {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--et-parchment-muted);
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.35rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.et-settings-tab:hover {
+    color: var(--et-parchment);
+    background: rgba(196, 163, 90, 0.08);
+}
+
+.et-settings-tab.is-active {
+    color: var(--et-brass-soft);
+    border-color: var(--et-edge);
+    background: rgba(196, 163, 90, 0.12);
+    font-weight: 600;
+}
+
+/* ---------- Offset existing chrome under AppNav ---------- */
+
+body.et-shell #top-bar {
+    top: var(--et-app-nav-height);
+}
+
+body.et-shell #top-settings-holder {
+    margin-top: var(--et-app-nav-height);
+}
+
+body.et-shell #sheld {
+    top: calc(var(--et-app-nav-height) + var(--topBarBlockSize));
+    height: calc(100dvh - var(--et-app-nav-height) - var(--topBarBlockSize) - 1px);
+    max-height: calc(100dvh - var(--et-app-nav-height) - var(--topBarBlockSize) - 1px);
+}
+
+body.et-shell .drawer-content:not(.fillLeft):not(.fillRight) {
+    top: calc(var(--et-app-nav-height) + var(--topBarBlockSize));
+    max-height: calc(100dvh - var(--et-app-nav-height) - var(--topBarBlockSize) - var(--bottomFormBlockSize));
+}
+
+body.et-shell .fillLeft,
+body.et-shell .fillRight {
+    top: var(--et-app-nav-height);
+    max-height: calc(100dvh - var(--et-app-nav-height));
+}
+
+/* Hide top-bar toggles for screens / settings sections that live in AppNav */
+body.et-shell #sys-settings-button > .drawer-toggle,
+body.et-shell #user-settings-button > .drawer-toggle,
+body.et-shell #rightNavHolder > .drawer-toggle,
+body.et-shell #WI-SP-button > .drawer-toggle,
+body.et-shell #ai-config-button > .drawer-toggle,
+body.et-shell #advanced-formatting-button > .drawer-toggle,
+body.et-shell #backgrounds-button > .drawer-toggle,
+body.et-shell #persona-management-button > .drawer-toggle,
+body.et-shell #extensions-settings-button > .drawer-toggle {
+    display: none !important;
+}
+
+body.et-shell #sys-settings-button,
+body.et-shell #user-settings-button,
+body.et-shell #rightNavHolder,
+body.et-shell #WI-SP-button,
+body.et-shell #ai-config-button,
+body.et-shell #advanced-formatting-button,
+body.et-shell #backgrounds-button,
+body.et-shell #persona-management-button,
+body.et-shell #extensions-settings-button {
+    width: 0;
+    min-width: 0;
+    overflow: visible;
+    flex: 0 0 0;
+}
+
+/* When all primary drawers moved, collapse empty top bar chrome on chat */
+body.et-shell[data-et-screen='chat'] #top-settings-holder {
+    min-height: 0;
+}
+
+/* ---------- Exclusive screens ---------- */
+
+body.et-shell[data-et-screen]:not([data-et-screen='chat']) #sheld {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+body.et-shell[data-et-screen='connect'] #rm_api_block,
+body.et-shell[data-et-screen='characters'] #right-nav-panel,
+body.et-shell[data-et-screen='world'] #WorldInfo,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+    display: flex !important;
+    flex-direction: column;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    z-index: 4000 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box;
+    padding: 1.75rem clamp(5.5rem, 16vw, 14rem) 2.75rem !important;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.94)),
+        var(--SmartThemeBlurTintColor, #1c1814);
+    animation: et-screen-in 180ms ease-out;
+}
+
+/* Screens without settings tabs sit under AppNav only */
+body.et-shell[data-et-screen='connect'] #rm_api_block,
+body.et-shell[data-et-screen='characters'] #right-nav-panel,
+body.et-shell[data-et-screen='world'] #WorldInfo {
+    top: var(--et-app-nav-height) !important;
+}
+
+/* Settings sections sit under AppNav + section tabs */
+body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+    top: calc(var(--et-app-nav-height) + var(--et-settings-tabs-height)) !important;
+}
+
+body.et-shell[data-et-screen='characters'] #right-nav-panel #rm_print_characters_block {
+    max-height: none;
+    flex: 1;
+}
+
+body.et-shell[data-et-screen='characters'] #rm_button_panel_pin_div,
+body.et-shell[data-et-screen='world'] #WI_panel_pin_div,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #lm_button_panel_pin_div {
+    display: none !important;
+}
+
+/* World screen: clearer toolbar + entry workspace */
+body.et-shell[data-et-screen='world'] #WorldInfo #world_popup > .flex-container.alignitemscenter:first-of-type {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.65rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background: rgba(18, 16, 14, 0.92);
+    border: 1px solid var(--et-edge);
+    border-radius: 0.45rem;
+    backdrop-filter: blur(8px);
+}
+
+body.et-shell[data-et-screen='world'] #WorldInfo #world_editor_select {
+    min-width: min(18rem, 100%);
+    flex: 1;
+}
+
+body.et-shell[data-et-screen='world'] #WorldInfo #world_entries_list,
+body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
+    max-width: 100%;
+}
+
+@keyframes et-screen-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 720px) {
+    .et-nav-brand-text {
+        display: none;
+    }
+
+    .et-nav-item span {
+        display: none;
+    }
+
+    .et-nav-item {
+        padding: 0.45rem 0.55rem;
+    }
+
+    .et-nav-version,
+    #et-app-nav #version_display {
+        display: none;
+    }
+
+    #et-settings-tabs {
+        padding: 0 0.75rem;
+    }
+
+    body.et-shell[data-et-screen='connect'] #rm_api_block,
+    body.et-shell[data-et-screen='characters'] #right-nav-panel,
+    body.et-shell[data-et-screen='world'] #WorldInfo,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+        padding: 1.25rem clamp(1.5rem, 7vw, 2.5rem) 2rem !important;
+    }
+}

@@ -23,6 +23,7 @@ import { renderTemplateAsync } from './templates.js';
 import { t } from './i18n.js';
 import { accountStorage } from './util/AccountStorage.js';
 import { getOrCreatePersonaDescriptor, setPersonaDescription, user_avatar } from './personas.js';
+import { navigate as navigateEtScreen } from './app-nav.js';
 
 export const world_info_insertion_strategy = {
     evenly: 0,
@@ -5812,14 +5813,106 @@ export async function importWorldInfo(file) {
 }
 
 /**
+ * Parse a lorebook file into ST world-info data shape `{ entries: ... }`.
+ * @param {File} file
+ * @returns {Promise<object|null>}
+ */
+async function parseWorldInfoFileToData(file) {
+    let jsonData;
+
+    if (file.name.endsWith('.png')) {
+        const buffer = new Uint8Array(await getFileBuffer(file));
+        jsonData = extractDataFromPng(buffer, 'naidata');
+    } else {
+        jsonData = await parseJsonFile(file);
+    }
+
+    if (jsonData === undefined || jsonData === null) {
+        toastr.error(t`File is not valid: ${file.name}`);
+        return null;
+    }
+
+    if (jsonData.lorebookVersion !== undefined) {
+        return convertNovelLorebook(jsonData);
+    }
+    if (jsonData.kind === 'memory') {
+        return convertAgnaiMemoryBook(jsonData);
+    }
+    if (jsonData.type === 'risu') {
+        return convertRisuLorebook(jsonData);
+    }
+    if (jsonData.entries && typeof jsonData.entries === 'object') {
+        return jsonData;
+    }
+
+    toastr.error(t`Unrecognized World Info format: ${file.name}`);
+    return null;
+}
+
+/**
+ * Replace the currently selected lorebook's data with a JSON/PNG file.
+ * Unlike importWorldInfo (which creates/overwrites by filename), this targets the open editor book.
+ * @param {File} file
+ * @param {string} [targetName] Optional book name; defaults to current editor selection
+ * @returns {Promise<boolean>}
+ */
+export async function replaceWorldInfo(file, targetName = null) {
+    if (!file) {
+        return false;
+    }
+
+    const selectedIndex = String($('#world_editor_select').find(':selected').val());
+    const name = targetName || (selectedIndex !== '' ? world_names[Number(selectedIndex)] : null);
+
+    if (!name) {
+        toastr.warning(t`Select a World Info book to replace, or use Import to create a new one.`);
+        return false;
+    }
+
+    let data;
+    try {
+        data = await parseWorldInfoFileToData(file);
+    } catch (error) {
+        console.error(error);
+        toastr.error(t`Error parsing file: ${error}`);
+        return false;
+    }
+
+    if (!data) {
+        return false;
+    }
+
+    const entryCount = data.entries ? Object.keys(data.entries).length : 0;
+    const confirmed = await Popup.show.confirm(
+        t`Replace World Info`,
+        `<p>${t`This will completely replace all entries in`} <strong>${escapeHtml(name)}</strong>.</p>` +
+        `<p>${t`Imported entries`}: <strong>${entryCount}</strong></p>` +
+        `<p>${t`This cannot be undone. Export first if you need a backup.`}</p>`,
+    );
+
+    if (!confirmed) {
+        return false;
+    }
+
+    try {
+        await saveWorldInfo(name, data, true);
+        reloadEditor(name, true);
+        toastr.success(t`World Info "${name}" replaced successfully!`);
+        return true;
+    } catch (error) {
+        console.error('Error replacing world info:', error);
+        toastr.error(t`Failed to replace World Info`);
+        return false;
+    }
+}
+
+/**
  * Forces the world info editor to open on a specific world.
  * @param {string} worldName The name of the world to open
  */
 export function openWorldInfoEditor(worldName) {
     console.log(`Opening lorebook for ${worldName}`);
-    if (!$('#WorldInfo').is(':visible')) {
-        $('#WIDrawerIcon').trigger('click');
-    }
+    navigateEtScreen('world');
     const index = world_names.indexOf(worldName);
     $('#world_editor_select').val(index).trigger('change');
 }
@@ -6079,6 +6172,25 @@ export function initWorldInfo() {
         await importWorldInfo(file);
 
         // Will allow to select the same file twice in a row
+        e.target.value = '';
+    });
+
+    $('#world_replace_button').on('click', function () {
+        const selectedIndex = String($('#world_editor_select').find(':selected').val());
+        if (selectedIndex === '') {
+            toastr.warning(t`Select a World Info book to replace first.`);
+            return;
+        }
+        $('#world_replace_file').trigger('click');
+    });
+
+    $('#world_replace_file').on('change', async function (e) {
+        if (!(e.target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        const file = e.target.files[0];
+        await replaceWorldInfo(file);
         e.target.value = '';
     });
 

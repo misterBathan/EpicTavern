@@ -276,6 +276,15 @@ import { initDataMaid } from './scripts/data-maid.js';
 import { clearItemizedPrompts, deleteItemizedPromptForMessage, deleteItemizedPrompts, findItemizedPromptSet, initItemizedPrompts, itemizedParams, itemizedPrompts, loadItemizedPrompts, promptItemize, replaceItemizedPromptText, saveItemizedPrompts, swapItemizedPrompts } from './scripts/itemized-prompts.js';
 import { getSystemMessageByType, initSystemMessages, SAFETY_CHAT, sendSystemMessage, system_message_types, system_messages } from './scripts/system-messages.js';
 import { event_types, eventSource } from './scripts/events.js';
+import {
+    initAppNav,
+    navigate as navigateEtScreen,
+    navigateSettings as navigateEtSettings,
+    screenForDrawer,
+    settingsSectionForDrawer,
+    isScreenPanel,
+    getCurrentScreen,
+} from './scripts/app-nav.js';
 import { initAccessibility } from './scripts/a11y.js';
 import { applyStreamFadeIn } from './scripts/util/stream-fadein.js';
 import { initDomHandlers } from './scripts/dom-handlers.js';
@@ -419,7 +428,7 @@ export let isChatSaving = false;
 let firstRun = false;
 export let settingsReady = false;
 let currentVersion = '0.0.0';
-export let displayVersion = 'SillyTavern';
+export let displayVersion = 'EpicTavern';
 
 let generation_started = new Date();
 /** @type {Character[]} */
@@ -503,11 +512,11 @@ async function getClientVersion() {
         const response = await fetch('/version');
         const data = await response.json();
         CLIENT_VERSION = data.agent;
-        displayVersion = `SillyTavern ${data.pkgVersion}`;
+        displayVersion = `EpicTavern ${data.pkgVersion}`;
         currentVersion = data.pkgVersion;
 
-        if (data.gitRevision && data.gitBranch) {
-            displayVersion += ` '${data.gitBranch}' (${data.gitRevision})`;
+        if (data.gitBranch) {
+            displayVersion += ` '${data.gitBranch}'`;
         }
 
         $('#version_display').text(displayVersion);
@@ -8706,6 +8715,7 @@ export function select_selected_character(chid, { switchMenu = true } = {}) {
     switchMenu && setMenuType('character_edit');
     $('#delete_button').css('display', 'flex');
     $('#export_button').css('display', 'flex');
+    $('#et_character_replace_json').css('display', 'flex');
 
     //create text poles
     $('#rm_button_back').css('display', 'none');
@@ -8802,6 +8812,7 @@ function select_rm_create({ switchMenu = true } = {}) {
     $('#delete_button_div').css('display', 'none');
     $('#delete_button').css('display', 'none');
     $('#export_button').css('display', 'none');
+    $('#et_character_replace_json').css('display', 'none');
     $('#create_button_label').css('display', '');
     $('#create_button').attr('value', 'Create');
     $('#dupe_button').hide();
@@ -10878,6 +10889,16 @@ export async function newAssistantChat({ temporary = false } = {}) {
  */
 function doDrawerOpenClick() {
     const targetDrawerID = $(this).attr('data-target');
+    const settingsSection = settingsSectionForDrawer(targetDrawerID);
+    if (settingsSection) {
+        navigateEtSettings(settingsSection);
+        return;
+    }
+    const screen = screenForDrawer(targetDrawerID);
+    if (screen) {
+        navigateEtScreen(screen);
+        return;
+    }
     const drawer = $(`#${targetDrawerID}`);
     const drawerToggle = drawer.find('.drawer-toggle');
     const drawerWasOpenAlready = drawerToggle.parent().find('.drawer-content').hasClass('openDrawer');
@@ -10895,6 +10916,28 @@ export async function doNavbarIconClick() {
     const drawer = $(this).parent().find('.drawer-content');
     const drawerWasOpenAlready = $(this).parent().find('.drawer-content').hasClass('openDrawer');
     const targetDrawerID = $(this).parent().find('.drawer-content').attr('id');
+    const parentDrawerId = $(this).parent().attr('id');
+
+    // EpicTavern: primary surfaces are exclusive screens / settings sections.
+    const settingsSection = settingsSectionForDrawer(parentDrawerId) || settingsSectionForDrawer(targetDrawerID);
+    if (settingsSection) {
+        if (getCurrentScreen() === 'settings') {
+            navigateEtSettings(settingsSection);
+        } else {
+            navigateEtSettings(settingsSection);
+        }
+        return;
+    }
+
+    const screen = screenForDrawer(parentDrawerId) || screenForDrawer(targetDrawerID);
+    if (screen) {
+        if (getCurrentScreen() === screen) {
+            navigateEtScreen('chat');
+        } else {
+            navigateEtScreen(screen);
+        }
+        return;
+    }
 
     if (!drawerWasOpenAlready) {
         const $openDrawers = $('.openDrawer:not(.pinnedOpen)');
@@ -11039,6 +11082,18 @@ function initCharacterSearch() {
 
 // MARK: DOM Handlers Start
 jQuery(async function () {
+    initAppNav();
+    if (displayVersion) {
+        $('#version_display').text(displayVersion);
+        $('#version_display_welcome').text(displayVersion);
+    }
+
+    document.addEventListener('et-screen-changed', (e) => {
+        if (e?.detail?.screen === 'characters') {
+            favsToHotswap();
+        }
+    });
+
     setTimeout(function () {
         $('#groupControlsToggle').trigger('click');
         $('#groupCurrentMemberListToggle .inline-drawer-icon').trigger('click');
@@ -11973,6 +12028,40 @@ jQuery(async function () {
         exportPopper.update();
     });
 
+    $('#et_character_replace_json').on('click', async function () {
+        if (this_chid === undefined || !characters[this_chid]) {
+            toastr.warning(t`Select a character to replace first.`);
+            return;
+        }
+
+        const confirmed = await Popup.show.confirm(
+            t`Replace Character`,
+            `<p>${t`Choose a JSON or character card file to completely replace`} <strong>${escapeHtml(characters[this_chid].name)}</strong>.</p>` +
+            `<p>${t`Chats, assets and group memberships will be preserved, but local character data will be overwritten.`}</p>`,
+        );
+        if (!confirmed) {
+            return;
+        }
+
+        const currentChatFile = characters[this_chid].chat;
+        async function uploadReplacementCard(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            try {
+                const data = new Map();
+                data.set(file, characters[this_chid].avatar);
+                await processDroppedFiles([file], data);
+                await openCharacterChat(currentChatFile);
+            } catch {
+                toastr.error(t`Failed to replace the character card.`, t`Something went wrong`);
+            }
+        }
+        $('#character_replace_file').off('change').on('change', uploadReplacementCard).trigger('click');
+    });
+
     $(document).on('click', '.export_format', async function () {
         const format = $(this).data('format');
 
@@ -12117,13 +12206,20 @@ jQuery(async function () {
         }
 
         // This autocloses open drawers that are not pinned if a click happens inside the app which does not target them.
+        // Phase 1 screen panels are exclusive destinations and must not auto-close.
         const targetParentHasOpenDrawer = clickTarget.parents('.openDrawer').length;
-        if (!clickTarget.hasClass('drawer-icon') && !clickTarget.hasClass('openDrawer')) {
-            const $openDrawers = $('.openDrawer').not('.pinnedOpen');
+        if (!clickTarget.hasClass('drawer-icon') && !clickTarget.hasClass('openDrawer') && !clickTarget.closest('#et-app-nav').length) {
+            const $openDrawers = $('.openDrawer').not('.pinnedOpen').filter(function () {
+                return !isScreenPanel(this.id);
+            });
             if ($openDrawers.length && targetParentHasOpenDrawer === 0) {
-                // Toggle icon and drawer classes
-                $('.openIcon').not('.drawerPinnedOpen').toggleClass('closedIcon openIcon');
-                $openDrawers.toggleClass('closedDrawer openDrawer');
+                // Toggle icon and drawer classes (legacy drawers only)
+                $openDrawers.each(function () {
+                    const $panel = $(this);
+                    const $icon = $panel.closest('.drawer').find('.drawer-icon');
+                    $panel.toggleClass('closedDrawer openDrawer');
+                    $icon.not('.drawerPinnedOpen').toggleClass('closedIcon openIcon');
+                });
             }
         }
     });

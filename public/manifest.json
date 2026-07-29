@@ -1,10 +1,10 @@
 {
-    "name": "SillyTavern",
-    "short_name": "SillyTavern",
+    "name": "EpicTavern",
+    "short_name": "EpicTavern",
     "start_url": "/",
     "display": "standalone",
-    "theme_color": "#202124",
-    "background_color": "#202124",
+    "theme_color": "#1c1814",
+    "background_color": "#12100e",
     "icons": [
         {
             "src": "img/apple-icon-57x57.png",

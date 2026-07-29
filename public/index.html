@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>SillyTavern</title>
+    <title>EpicTavern</title>
     <base href="/">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
@@ -43,12 +43,13 @@
     <link rel="stylesheet" type="text/css" href="css/select2-overrides.css">
     <link rel="stylesheet" type="text/css" href="css/mobile-styles.css">
     <link rel="stylesheet" type="text/css" href="css/macros.css">
+    <link rel="stylesheet" type="text/css" href="css/epictavern-shell.css">
     <link rel="stylesheet" type="text/css" href="css/user.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!-- Scripts are loaded at the end of the body to improve page load speed -->
 </head>
 
-<body class="no-blur">
+<body class="no-blur et-shell" data-et-screen="chat">
     <div id="preloader"></div>
     <div id="bg1"></div>
     <div id="character_context_menu" class="hidden">
@@ -4823,7 +4824,9 @@
                             <select id="world_editor_select">
                                 <option value="" data-i18n="--- Pick to Edit ---">--- Pick to Edit ---</option>
                             </select>
-                            <div id="world_import_button" class="menu_button fa-solid fa-file-import" title="Import World Info" data-i18n="[title]Import World Info"></div>
+                            <div id="world_import_button" class="menu_button fa-solid fa-file-import" title="Import as new World Info" data-i18n="[title]Import as new World Info"></div>
+                            <div id="world_replace_button" class="menu_button fa-solid fa-file-circle-check" title="Replace selected World Info with JSON" data-i18n="[title]Replace selected World Info with JSON"></div>
+                            <input type="file" id="world_replace_file" accept=".json,.lorebook,.png" hidden>
                             <div id="world_popup_export" class="menu_button fa-solid fa-file-export" title="Export World Info" data-i18n="[title]Export World Info"></div>
                             <div id="world_popup_name_button" class="menu_button fa-pencil fa-solid" title="Rename World Info" data-i18n="[title]Rename World Info"></div>
                             <div id="world_duplicate" class="menu_button fa-solid fa-paste" title="Duplicate World Info" data-i18n="[title]Duplicate World Info"></div>
@@ -4887,7 +4890,6 @@
                                 <option value="en">English</option>
                             </select>
                         </div>
-                        <small id="version_display"></small>
                     </div>
                     <div name="UserSettingsRowTwo" class="flex-container flexFlowRow">
                         <div id="account_controls" class="flex-container">
@@ -6062,6 +6064,7 @@
                                                 <div class="chat_lorebook_button menu_button fa-solid fa-passport" title="Chat Lore&#10;&#10;Click to load&#10;Shift/Alt-click or long-press to open 'Link to Chat Lorebook' popup" data-i18n="[title]chat_lorebook_button_title"></div>
                                                 <div id="char_connections_button" class="menu_button fa-solid fa-face-smile" title="Connected Personas" data-i18n="[title]Connected Personas"></div>
                                                 <div id="export_button" class="menu_button fa-solid fa-file-export " title="Export and Download" data-i18n="[title]Export and Download"></div>
+                                                <div id="et_character_replace_json" class="menu_button fa-solid fa-file-circle-check" title="Replace character with JSON / card file" data-i18n="[title]Replace character with JSON / card file"></div>
                                                 <!-- <div id="set_chat_character_settings" class="menu_button fa-solid fa-scroll" title="Set a chat scenario override"></div> -->
                                                 <!-- <div id="set_character_world" class="menu_button fa-solid fa-globe" title="Set a character World Info / Lorebook"></div> -->
                                                 <div id="dupe_button" class="menu_button fa-solid fa-clone " title="Duplicate Character" data-i18n="[title]Duplicate Character"></div>
@@ -6091,8 +6094,8 @@
                                                     <option id="character_source" data-i18n="Link to Source">
                                                         Link to Source
                                                     </option>
-                                                    <option id="replace_update" data-i18n="Replace / Update">
-                                                        Replace / Update
+                                                    <option id="replace_update" data-i18n="Replace with JSON / File">
+                                                        Replace with JSON / File
                                                     </option>
                                                     <option id="import_tags" data-i18n="Import Tags">
                                                         Import Tags

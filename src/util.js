@@ -161,7 +161,7 @@ export async function getVersion() {
         // suppress exception
     }
 
-    const agent = `SillyTavern:${pkgVersion}:Cohee#1207`;
+    const agent = `EpicTavern:${pkgVersion}`;
     return { agent, pkgVersion, gitRevision, gitBranch, commitDate: commitDate?.trim() ?? null, isLatest };
 }
 
