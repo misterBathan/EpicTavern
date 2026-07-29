@@ -1,0 +1,203 @@
+/**
+ * EpicTavern RPG shell overrides.
+ * Chat: keep original companion side-panel behavior (do not collapse into a strip).
+ * Journal: full-viewport expanded panel.
+ * Never cover #sheld / send controls.
+ */
+
+/* Journal host (router panel) */
+#et-journal-screen {
+    display: none;
+}
+
+body.et-shell[data-et-screen='journal'] #et-journal-screen {
+    display: block !important;
+    position: fixed !important;
+    top: var(--et-app-nav-height) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    z-index: 3500 !important;
+    pointer-events: none;
+    background: transparent;
+    border: none;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hide RPG chrome on non chat/journal screens */
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-companion-panel,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-mobile-toggle,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-plot-buttons,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-thought-panel,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-thought-icon,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-alt-present-characters {
+    display: none !important;
+}
+
+/* Chat: only nudge original panel under AppNav — keep original width/position math */
+body.et-shell[data-et-screen='chat'] #sheld {
+    z-index: 1100 !important; /* keep chat + send controls above RPG panel */
+}
+
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel.rpg-panel {
+    top: calc(var(--et-app-nav-height) + var(--topBarBlockSize)) !important;
+    z-index: 800 !important; /* must stay below #sheld so send button stays usable */
+}
+
+body.et-shell[data-et-screen='chat'] #form_sheld,
+body.et-shell[data-et-screen='chat'] #send_form {
+    position: relative;
+    z-index: 1200;
+}
+
+/* Always reserve the send control (ST hides it while disconnected) */
+body.et-shell #rightSendForm {
+    flex: 0 0 auto;
+    min-width: var(--bottomFormBlockSize);
+    align-items: center;
+}
+
+body.et-shell #send_but.displayNone,
+body.et-shell #send_but {
+    display: flex !important;
+}
+
+body.et-shell #send_but.et-send-disconnected {
+    opacity: 0.45;
+    filter: grayscale(0.35);
+    cursor: pointer;
+}
+
+/* Connection state on AppNav Connect item */
+#et-app-nav .et-nav-item[data-et-screen='connect'].et-nav-disconnected {
+    color: #e07070;
+    border-color: rgba(224, 112, 112, 0.45);
+    background: rgba(224, 112, 112, 0.12);
+}
+
+#et-app-nav .et-nav-item[data-et-screen='connect'].et-nav-connected:not(.is-active) {
+    color: #8fce8f;
+}
+
+/* Journal: full-viewport RPG panel with all sections visible */
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel,
+body.et-rpg-journal-open #rpg-companion-panel.rpg-panel {
+    position: fixed !important;
+    top: var(--et-app-nav-height) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    z-index: 4000 !important;
+    box-shadow: none !important;
+    pointer-events: auto;
+    overflow: auto !important;
+}
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-game-container {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
+    flex: 1;
+    overflow: auto;
+}
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-collapse-toggle,
+body.et-shell[data-et-screen='journal'] #rpg-mobile-toggle {
+    display: none !important;
+}
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-strip-widget-container {
+    display: none !important;
+}
+
+@media (max-width: 1000px) {
+    body.et-shell[data-et-screen='chat'] #rpg-mobile-toggle {
+        top: calc(var(--et-app-nav-height) + 0.75rem) !important;
+        z-index: 1400 !important;
+    }
+}
+
+/* Hide RPG chrome when no character/group chat is open */
+body.et-shell.et-rpg-no-active-chat #rpg-companion-panel,
+body.et-shell.et-rpg-no-active-chat #rpg-mobile-toggle,
+body.et-shell.et-rpg-no-active-chat #rpg-plot-buttons,
+body.et-shell.et-rpg-no-active-chat #rpg-thought-panel,
+body.et-shell.et-rpg-no-active-chat #rpg-thought-icon,
+body.et-shell.et-rpg-no-active-chat #rpg-alt-present-characters,
+body.et-shell.et-rpg-no-active-chat #rpg-collapse-toggle {
+    display: none !important;
+}
+
+/* Keep Edit Trackers / Settings / Refresh always visible under the tab content */
+body.et-shell #rpg-panel-content {
+    overflow: hidden !important;
+}
+
+body.et-shell #rpg-panel-content > .rpg-content-box {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+body.et-shell #rpg-panel-content > .rpg-settings-buttons-row,
+body.et-shell #rpg-panel-content > #rpg-manual-update,
+body.et-shell #rpg-panel-content > .rpg-features-row {
+    flex-shrink: 0 !important;
+}
+
+body.et-shell #rpg-panel-content > .rpg-settings-buttons-row {
+    margin-top: 0.25em;
+    gap: 0.375em;
+}
+
+body.et-shell #rpg-panel-content > .rpg-features-row {
+    margin-bottom: 0 !important;
+    max-height: 3.75rem;
+}
+
+body.et-shell #rpg-panel-content > #rpg-manual-update {
+    margin-top: 0.25em !important;
+}
+
+/* Always-visible header actions (refresh / edit trackers / settings) */
+body.et-shell .rpg-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+body.et-shell .rpg-panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+body.et-shell .rpg-panel-header-actions .rpg-btn-icon {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+body.et-shell #rpg-smart-update-status,
+.rpg-smart-update-status {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    opacity: 0.75;
+    padding: 0.15rem 0.35rem;
+    color: var(--rpg-text, inherit);
+}

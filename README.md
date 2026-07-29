@@ -2,17 +2,20 @@
 
 Fork of SillyTavern focused on screen-based UX, native RPG tracking, lore tools, and long-term memory.
 
-Based on SillyTavern 1.18.0 (AGPL-3.0). EpicTavern product version starts at **0.0.1** (`package.json`).
+Based on SillyTavern 1.18.0 (AGPL-3.0). EpicTavern product version: **0.0.1**.
 
-## Phase 2 (current)
+## Phase 3 (current)
 
 Exclusive screens via AppNav:
 
-- **Chat** — `#/chat`
-- **Characters** — `#/characters` (includes **Replace with JSON** button next to Export)
-- **World** — `#/world` (fullscreen lorebooks; **Replace** selected book with JSON)
+- **Chat** — `#/chat` (compact RPG HUD strip when RPG is enabled)
+- **Characters** — `#/characters`
+- **World** — `#/world`
+- **Journal** — `#/journal` (full RPG Companion panels: stats, scene, inventory, quests, thoughts)
 - **Connect** — `#/connect`
-- **Settings** — `#/settings` and `#/settings/{general|ai|formatting|backgrounds|personas|extensions}`
+- **Settings** — `#/settings/...` (RPG toggles also under Settings → Extensions)
+
+RPG Companion is vendored as core under `public/scripts/rpg/` (see `NOTICE.md`).
 
 ## Run
 
@@ -21,7 +24,7 @@ npm install
 npm start
 ```
 
-Then open the URL printed in the terminal (usually `http://127.0.0.1:8000`).
+Open the URL printed in the terminal (usually `http://127.0.0.1:8000`). Hard-refresh after pulls (Ctrl+F5).
 
 ## License
 

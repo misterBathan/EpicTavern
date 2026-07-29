@@ -5,7 +5,7 @@
 
 import { eventSource, event_types } from './events.js';
 
-/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'settings'} EtScreen */
+/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'journal' | 'settings'} EtScreen */
 /** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds' | 'personas' | 'extensions'} EtSettingsSection */
 
 /**
@@ -31,6 +31,11 @@ export const ET_SCREENS = {
         title: 'World',
         panelId: 'WorldInfo',
         drawerId: 'WI-SP-button',
+    },
+    journal: {
+        title: 'Journal',
+        panelId: 'et-journal-screen',
+        drawerId: null,
     },
     settings: {
         title: 'Settings',
@@ -191,7 +196,7 @@ function closeLegacyDrawers() {
 function syncPanelOpenState(panelId, open) {
     const $panel = $(`#${panelId}`);
     const $drawer = $panel.closest('.drawer');
-    const $icon = $drawer.find('.drawer-icon');
+    const $icon = $drawer.length ? $drawer.find('.drawer-icon') : $();
     if (open) {
         $panel.removeClass('closedDrawer').addClass('openDrawer et-screen-active');
         $icon.removeClass('closedIcon').addClass('openIcon');
@@ -319,6 +324,15 @@ export function navigateSettings(section) {
 export function initAppNav() {
     document.body.classList.add('et-shell');
 
+    if (!document.getElementById('et-journal-screen')) {
+        const journal = document.createElement('div');
+        journal.id = 'et-journal-screen';
+        journal.className = 'drawer-content closedDrawer';
+        journal.setAttribute('aria-label', 'Journal');
+        journal.innerHTML = '<div id="et-journal-root"></div>';
+        document.body.appendChild(journal);
+    }
+
     if (!document.getElementById('et-app-nav')) {
         const nav = document.createElement('nav');
         nav.id = 'et-app-nav';
@@ -341,6 +355,10 @@ export function initAppNav() {
                     <i class="fa-solid fa-book-atlas" aria-hidden="true"></i>
                     <span>World</span>
                 </button>
+                <button type="button" class="et-nav-item" data-et-screen="journal" role="listitem">
+                    <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+                    <span>Journal</span>
+                </button>
                 <button type="button" class="et-nav-item" data-et-screen="connect" role="listitem">
                     <i class="fa-solid fa-plug" aria-hidden="true"></i>
                     <span>Connect</span>
@@ -352,8 +370,8 @@ export function initAppNav() {
             </div>
             <div class="et-nav-meta">
                 <small id="version_display" class="et-nav-version" title="EpicTavern version"></small>
-                <div class="et-nav-phase" title="Next: RPG Journal, Memory">
-                    <span class="et-nav-phase-pill">Phase 2</span>
+                <div class="et-nav-phase" title="Next: Memory, visual polish">
+                    <span class="et-nav-phase-pill">Phase 3</span>
                 </div>
             </div>
         `;

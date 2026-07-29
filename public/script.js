@@ -285,6 +285,8 @@ import {
     isScreenPanel,
     getCurrentScreen,
 } from './scripts/app-nav.js';
+import { initRpgCompanion } from './scripts/rpg/index.js';
+import { initEtSendFix } from './scripts/et-send-fix.js';
 import { initAccessibility } from './scripts/a11y.js';
 import { applyStreamFadeIn } from './scripts/util/stream-fadein.js';
 import { initDomHandlers } from './scripts/dom-handlers.js';
@@ -794,6 +796,16 @@ async function firstLoadInit() {
     await eventSource.emit(event_types.APP_INITIALIZED);
     await initLoaderHandle.hide();
     await fixViewport();
+    try {
+        await initRpgCompanion();
+    } catch (error) {
+        console.error('[EpicTavern] RPG init failed:', error);
+    }
+    try {
+        initEtSendFix();
+    } catch (error) {
+        console.error('[EpicTavern] Send fix init failed:', error);
+    }
     await eventSource.emit(event_types.APP_READY);
 }
 
