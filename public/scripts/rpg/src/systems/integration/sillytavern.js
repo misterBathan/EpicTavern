@@ -540,7 +540,7 @@ export async function onMessageReceived(data) {
                 if (typeof toastr !== 'undefined') {
                     toastr.warning(
                         'Trackers updated, but there was no roleplay reply. Swipe to regenerate, or switch to Separate mode in RPG Settings.',
-                        'RPG Companion',
+                        'Journal',
                         { timeOut: 8000 },
                     );
                 }

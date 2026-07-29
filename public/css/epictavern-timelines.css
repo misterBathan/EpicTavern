@@ -53,8 +53,59 @@ body.et-shell:not([data-et-screen='timeline']) #timelinesModal {
     display: none !important;
 }
 
-/* Default node colors are hex; keep nodes clearly visible on dark shells */
+/* Candlelit graph chrome */
+body.et-shell[data-et-screen='timeline'] #networkContainer {
+    padding: 0.75rem !important;
+    border: none !important;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.96)) !important;
+    color: var(--et-parchment, #e8dfd0) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
 body.et-shell[data-et-screen='timeline'] #timelinesDiagramDiv {
     min-height: 280px;
-    background: rgba(0, 0, 0, 0.15);
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(212, 137, 58, 0.08), transparent 55%),
+        rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28));
+}
+
+body.et-shell[data-et-screen='timeline'] .legend-bottom-right {
+    border: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
+    border-radius: 0.25rem !important;
+    background: rgba(18, 16, 14, 0.88) !important;
+    color: var(--et-parchment, #e8dfd0);
+}
+
+body.et-shell[data-et-screen='timeline'] #transparent-search {
+    border: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
+    border-radius: 0.25rem !important;
+    background: rgba(18, 16, 14, 0.75) !important;
+    color: var(--et-parchment, #e8dfd0) !important;
+}
+
+body.et-shell[data-et-screen='timeline'] #networkContainer > button {
+    color: var(--et-parchment-muted, #b9ae9c) !important;
+    background: rgba(196, 163, 90, 0.12) !important;
+    border: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
+    border-radius: 0.25rem !important;
+}
+
+body.et-shell[data-et-screen='timeline'] #networkContainer > button:hover {
+    color: var(--et-brass-soft, #e0c989) !important;
+    border-color: var(--et-edge-strong, rgba(196, 163, 90, 0.45)) !important;
+}
+
+body.et-shell[data-et-screen='timeline'] .tippy-box {
+    background: rgba(28, 24, 20, 0.96) !important;
+    border: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
+    color: var(--et-parchment, #e8dfd0) !important;
+}
+
+@media (max-width: 720px) {
+    body.et-shell[data-et-screen='timeline'] #networkContainer {
+        padding: 0.4rem !important;
+    }
 }

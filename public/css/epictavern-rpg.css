@@ -201,3 +201,36 @@ body.et-shell #rpg-smart-update-status,
     padding: 0.15rem 0.35rem;
     color: var(--rpg-text, inherit);
 }
+/* Candlelit Journal / HUD tokens */
+body.et-shell #rpg-companion-panel.rpg-panel {
+    --rpg-bg: var(--et-ink-elevated, #1c1814);
+    --rpg-text: var(--et-parchment, #e8dfd0);
+    --rpg-border: var(--et-edge, rgba(196, 163, 90, 0.28));
+    border-color: var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.96), rgba(18, 16, 14, 0.94)) !important;
+    color: var(--et-parchment, #e8dfd0) !important;
+    animation: et-hud-pulse 5s ease-in-out infinite;
+}
+
+body.et-shell #rpg-companion-panel .rpg-panel-header,
+body.et-shell #rpg-companion-panel .rpg-header {
+    border-bottom: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
+    color: var(--et-brass-soft, #e0c989) !important;
+}
+
+body.et-shell #rpg-companion-panel #rpg-panel-title {
+    letter-spacing: 0.04em;
+    font-weight: 650;
+}
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel {
+    animation: et-screen-in 220ms ease-out;
+    padding: 1rem clamp(1rem, 4vw, 3rem) 1.5rem !important;
+}
+
+@media (max-width: 720px) {
+    body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel {
+        padding: 0.75rem !important;
+    }
+}

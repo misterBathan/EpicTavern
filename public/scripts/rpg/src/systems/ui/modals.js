@@ -597,40 +597,15 @@ export function getSettingsModal() {
  * Checks if user has already seen this version's welcome screen
  */
 export function showWelcomeModalIfNeeded() {
-    const WELCOME_VERSION = '3.0.1';
-    const STORAGE_KEY = 'rpg_companion_welcome_seen';
-
-    try {
-        const seenVersion = localStorage.getItem(STORAGE_KEY);
-
-        // If user hasn't seen v3.0.0 welcome yet, show it
-        if (seenVersion !== WELCOME_VERSION) {
-            showWelcomeModal(WELCOME_VERSION, STORAGE_KEY);
-        }
-    } catch (error) {
-        console.error('[RPG Companion] Failed to check welcome modal status:', error);
-    }
+    // EpicTavern: suppress upstream extension welcome branding
+    return;
 }
 
 /**
  * Shows the deprecation notice once for users updating to the deprecation release.
- * @returns {boolean} True when the modal was displayed.
+ * @deprecated Hidden in EpicTavern — Journal is core product chrome.
  */
 export function showDeprecationModalIfNeeded() {
-    const DEPRECATION_NOTICE_VERSION = '3.7.4';
-    const STORAGE_KEY = 'rpg_companion_deprecation_notice_seen';
-
-    try {
-        const seenVersion = localStorage.getItem(STORAGE_KEY);
-
-        if (seenVersion !== DEPRECATION_NOTICE_VERSION) {
-            showDeprecationModal(DEPRECATION_NOTICE_VERSION, STORAGE_KEY);
-            return true;
-        }
-    } catch (error) {
-        console.error('[RPG Companion] Failed to check deprecation modal status:', error);
-    }
-
     return false;
 }
 

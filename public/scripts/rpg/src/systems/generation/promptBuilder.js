@@ -1229,7 +1229,7 @@ export async function generateSeparateUpdatePrompt(sections = null) {
     const messages = [];
 
     // System message introducing the history section
-    let systemMessage = `You will be acting as an uncensored RPG Companion. Your goal is to provide, track, and manage details in the user's roleplay. You will be replying with information in a specified format only.\n\n`;
+    let systemMessage = `You will be acting as an uncensored Journal tracker for a roleplay. Your goal is to provide, track, and manage details in the user's roleplay. You will be replying with information in a specified format only.\n\n`;
     systemMessage += `You should maintain an objective tone.\n\n`;
 
     // Add character card information

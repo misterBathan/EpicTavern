@@ -1,5 +1,5 @@
 /**
- * EpicTavern shell: AppNav + exclusive screens (Phase 1–2).
+ * EpicTavern shell: AppNav + exclusive screens (Candlelit Tavern).
  */
 
 :root {
@@ -7,11 +7,46 @@
     --et-settings-tabs-height: 2.75rem;
     --et-ink: #12100e;
     --et-ink-elevated: #1c1814;
+    --et-ink-soft: #2a241c;
     --et-brass: #c4a35a;
     --et-brass-soft: #e0c989;
+    --et-ember: #d4893a;
     --et-parchment: #e8dfd0;
     --et-parchment-muted: #b9ae9c;
     --et-edge: rgba(196, 163, 90, 0.28);
+    --et-edge-strong: rgba(196, 163, 90, 0.45);
+    --et-glow: rgba(212, 137, 58, 0.22);
+    --et-motion: 220ms;
+}
+
+/* Ambient tavern wash behind exclusive screens */
+body.et-shell {
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 137, 58, 0.12), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(196, 163, 90, 0.06), transparent 50%),
+        var(--et-ink);
+}
+
+@keyframes et-screen-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes et-nav-glow {
+    0%, 100% { box-shadow: 0 0 0 0 transparent; }
+    50% { box-shadow: 0 0 12px var(--et-glow); }
+}
+
+@keyframes et-hud-pulse {
+    0%, 100% { border-color: var(--et-edge); }
+    50% { border-color: var(--et-edge-strong); }
+}
+
+body.et-shell.reduced-motion *,
+body.et-shell.reduced-motion *::before,
+body.et-shell.reduced-motion *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
 }
 
 /* ---------- AppNav ---------- */
@@ -65,6 +100,7 @@
     border-radius: 0.15rem;
     background: radial-gradient(circle at 30% 30%, var(--et-brass-soft), var(--et-brass) 55%, #7a5c28);
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 0 12px rgba(196, 163, 90, 0.35);
+    animation: et-nav-glow 4.5s ease-in-out infinite;
 }
 
 .et-nav-brand-text {
@@ -72,7 +108,7 @@
     letter-spacing: 0.04em;
     font-size: 1.05rem;
     color: var(--et-parchment);
-    transition: color var(--animation-duration, 0.2s) ease;
+    transition: color var(--et-motion) ease;
 }
 
 .et-nav-items {
@@ -118,6 +154,8 @@
     background: linear-gradient(180deg, var(--et-brass-soft), var(--et-brass));
     border-color: rgba(0, 0, 0, 0.2);
     font-weight: 600;
+    transition: background var(--et-motion) ease, color var(--et-motion) ease, box-shadow var(--et-motion) ease;
+    box-shadow: 0 0 14px var(--et-glow);
 }
 
 .et-nav-meta {
@@ -360,17 +398,6 @@ body.et-shell[data-et-screen='world'] #WorldInfo #world_editor_select {
 body.et-shell[data-et-screen='world'] #WorldInfo #world_entries_list,
 body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
     max-width: 100%;
-}
-
-@keyframes et-screen-in {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 @media (max-width: 720px) {

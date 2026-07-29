@@ -174,7 +174,7 @@ export const power_user = {
     movingUIState: {},
     movingUIPreset: '',
     noShadows: false,
-    theme: 'Default (Dark) 1.7.1',
+    theme: 'Candlelit Tavern',
 
     gestures: true,
     auto_swipe: false,

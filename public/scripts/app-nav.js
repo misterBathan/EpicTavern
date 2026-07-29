@@ -411,8 +411,8 @@ export function initAppNav() {
             </div>
             <div class="et-nav-meta">
                 <small id="version_display" class="et-nav-version" title="EpicTavern version"></small>
-                <div class="et-nav-phase" title="Next: visual polish">
-                    <span class="et-nav-phase-pill">Phase 4</span>
+                <div class="et-nav-phase" title="Candlelit Tavern visual pass">
+                    <span class="et-nav-phase-pill">Phase 5</span>
                 </div>
             </div>
         `;

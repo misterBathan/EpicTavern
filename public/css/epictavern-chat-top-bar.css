@@ -1,5 +1,5 @@
 /**
- * Chat top bar layout under AppNav (Chat screen only).
+ * Chat top bar layout under AppNav (Chat screen only) — Candlelit restyle.
  */
 
 @import url('../scripts/chat-top-bar/style.css');
@@ -16,9 +16,72 @@ body.et-shell[data-et-screen='chat'] #etChatTopBarSideBar {
     z-index: 1300;
 }
 
-/* Chat-scoped destinations (Timeline / Journal) sit with the chat chrome */
+/* Chat-scoped destinations (Timeline / Journal / Memory) */
 #etChatTopBarTimeline,
 #etChatTopBarJournal,
 #etChatTopBarMemory {
     margin-left: 0.15rem;
+}
+
+body.et-shell #etChatTopBar {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: 0 !important;
+    background:
+        linear-gradient(180deg, rgba(42, 36, 28, 0.92), rgba(28, 24, 20, 0.9)) !important;
+    color: var(--et-parchment) !important;
+    box-shadow: none !important;
+}
+
+body.et-shell #etChatTopBar .right_menu_button {
+    color: var(--et-parchment-muted);
+    transition: color var(--et-motion, 220ms) ease;
+}
+
+body.et-shell #etChatTopBar .right_menu_button:hover {
+    color: var(--et-brass-soft);
+}
+
+body.et-shell #etChatTopBarConnectionProfiles {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: 0 !important;
+    background: rgba(18, 16, 14, 0.94) !important;
+    color: var(--et-parchment) !important;
+}
+
+body.et-shell #etChatTopBarSideBar {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: 0 !important;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.96)) !important;
+}
+
+body.et-shell #etChatTopBarSideBar .sideBarItem {
+    border-radius: 0.25rem !important;
+    border-color: var(--et-edge) !important;
+    background: transparent !important;
+}
+
+body.et-shell #etChatTopBarSideBar .sideBarItem:hover {
+    background: rgba(196, 163, 90, 0.1) !important;
+    filter: none !important;
+}
+
+body.et-shell #etChatTopBarSideBar .sideBarItem.selected {
+    background: rgba(196, 163, 90, 0.16) !important;
+    border-color: var(--et-edge-strong, rgba(196, 163, 90, 0.45)) !important;
+}
+
+body.et-shell #etChatTopBarChatName,
+body.et-shell #etChatTopBarSearchInput,
+body.et-shell #etChatTopBarConnectionProfilesSelect {
+    border-color: var(--et-edge) !important;
+    background: rgba(18, 16, 14, 0.65) !important;
+    color: var(--et-parchment) !important;
+    border-radius: 0.25rem !important;
+}
+
+@media (max-width: 720px) {
+    body.et-shell #etChatTopBarSearchInput {
+        max-width: 5.5rem;
+    }
 }

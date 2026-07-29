@@ -287,7 +287,7 @@ export async function updateRPGData(renderUserStats, renderInfoBox, renderThough
 
             // Check if parsing completely failed (no tracker data found)
             if (parsedData.parsingFailed) {
-                toastr.error(i18n.getTranslation('errors.parsingError') || 'RPG Companion Trackers parsing error! The model returned incorrect format. Consider switching generation model if this persists.', '', { timeOut: 5000 });
+                toastr.error(i18n.getTranslation('errors.parsingError') || 'Journal trackers parsing error! The model returned incorrect format. Consider switching generation model if this persists.', '', { timeOut: 5000 });
             }
 
             // Remove locks from parsed data (JSON format only, text format is unaffected)
@@ -407,7 +407,7 @@ export async function updateRPGData(renderUserStats, renderInfoBox, renderThough
     } catch (error) {
         console.error('[RPG Companion] Error updating RPG data:', error);
         if (isExternalMode) {
-            toastr.error(error.message, 'RPG Companion External API Error');
+            toastr.error(error.message, 'Journal API Error');
         }
     } finally {
         setIsGenerating(false);
