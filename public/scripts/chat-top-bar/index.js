@@ -29,66 +29,68 @@ const connectionProfilesStatus = document.createElement('div');
 const connectionProfilesSelect = document.createElement('select');
 const connectionProfilesIcon = document.createElement('img');
 
-const icons = [
-    {
-        id: 'etChatTopBarToggleSidebar',
-        icon: 'fa-fw fa-solid fa-box-archive',
-        position: 'left',
-        title: t`Toggle sidebar`,
-        onClick: onToggleSidebarClick,
-    },
-    {
-        id: 'etChatTopBarToggleConnectionProfiles',
-        icon: 'fa-fw fa-solid fa-plug',
-        position: 'left',
-        title: t`Show connection profiles`,
-        isTemporaryAllowed: true,
-        onClick: onToggleConnectionProfilesClick,
-    },
-    {
-        id: 'etChatTopBarChatManager',
-        icon: 'fa-fw fa-solid fa-address-book',
-        position: 'right',
-        title: t`View chat files`,
-        isTemporaryAllowed: true,
-        onClick: onChatManagerClick,
-    },
-    {
-        id: 'etChatTopBarNewChat',
-        icon: 'fa-fw fa-solid fa-comments',
-        position: 'right',
-        title: t`New chat`,
-        isTemporaryAllowed: true,
-        onClick: onNewChatClick,
-    },
-    {
-        id: 'etChatTopBarRenameChat',
-        icon: 'fa-fw fa-solid fa-edit',
-        position: 'right',
-        title: t`Rename chat`,
-        onClick: onRenameChatClick,
-    },
-    {
-        id: 'etChatTopBarDeleteChat',
-        icon: 'fa-fw fa-solid fa-trash',
-        position: 'right',
-        title: t`Delete chat`,
-        onClick: async () => {
-            const confirm = await Popup.show.confirm(t`Are you sure?`);
-            if (confirm) {
-                await executeSlashCommandsWithOptions('/delchat');
-            }
+function getIcons() {
+    return [
+        {
+            id: 'etChatTopBarToggleSidebar',
+            icon: 'fa-fw fa-solid fa-box-archive',
+            position: 'left',
+            title: t`Toggle sidebar`,
+            onClick: onToggleSidebarClick,
         },
-    },
-    {
-        id: 'etChatTopBarCloseChat',
-        icon: 'fa-fw fa-solid fa-times',
-        position: 'right',
-        title: t`Close chat`,
-        isTemporaryAllowed: true,
-        onClick: onCloseChatClick,
-    },
-];
+        {
+            id: 'etChatTopBarToggleConnectionProfiles',
+            icon: 'fa-fw fa-solid fa-plug',
+            position: 'left',
+            title: t`Show connection profiles`,
+            isTemporaryAllowed: true,
+            onClick: onToggleConnectionProfilesClick,
+        },
+        {
+            id: 'etChatTopBarChatManager',
+            icon: 'fa-fw fa-solid fa-address-book',
+            position: 'right',
+            title: t`View chat files`,
+            isTemporaryAllowed: true,
+            onClick: onChatManagerClick,
+        },
+        {
+            id: 'etChatTopBarNewChat',
+            icon: 'fa-fw fa-solid fa-comments',
+            position: 'right',
+            title: t`New chat`,
+            isTemporaryAllowed: true,
+            onClick: onNewChatClick,
+        },
+        {
+            id: 'etChatTopBarRenameChat',
+            icon: 'fa-fw fa-solid fa-edit',
+            position: 'right',
+            title: t`Rename chat`,
+            onClick: onRenameChatClick,
+        },
+        {
+            id: 'etChatTopBarDeleteChat',
+            icon: 'fa-fw fa-solid fa-trash',
+            position: 'right',
+            title: t`Delete chat`,
+            onClick: async () => {
+                const confirm = await Popup.show.confirm(t`Are you sure?`);
+                if (confirm) {
+                    await executeSlashCommandsWithOptions('/delchat');
+                }
+            },
+        },
+        {
+            id: 'etChatTopBarCloseChat',
+            icon: 'fa-fw fa-solid fa-times',
+            position: 'right',
+            title: t`Close chat`,
+            isTemporaryAllowed: true,
+            onClick: onCloseChatClick,
+        },
+    ];
+}
 
 function onChatManagerClick() {
     document.getElementById('option_select_chat')?.click();
@@ -142,7 +144,7 @@ function setChatName(name) {
     chatName.appendChild(selectedOption);
     chatName.disabled = true;
 
-    icons.forEach(icon => {
+    getIcons().forEach(icon => {
         const iconElement = document.getElementById(icon.id);
         if (iconElement && !icon.isTemporaryAllowed) {
             iconElement.classList.toggle('not-in-chat', isNotInChat);
@@ -262,7 +264,7 @@ function addTopBar() {
 }
 
 function addIcons() {
-    icons.forEach(icon => {
+    getIcons().forEach(icon => {
         const iconElement = document.createElement('i');
         iconElement.id = icon.id;
         iconElement.className = icon.icon;
