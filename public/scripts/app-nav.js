@@ -5,8 +5,8 @@
 
 import { eventSource, event_types } from './events.js';
 
-/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'timeline' | 'journal' | 'settings'} EtScreen */
-/** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds' | 'personas' | 'extensions' | 'timeline'} EtSettingsSection */
+/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'personas' | 'timeline' | 'journal' | 'memory' | 'settings'} EtScreen */
+/** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds' | 'extensions'} EtSettingsSection */
 
 /**
  * @type {Record<EtScreen, { title: string, panelId: string | null, drawerId: string | null }>}
@@ -32,6 +32,11 @@ export const ET_SCREENS = {
         panelId: 'WorldInfo',
         drawerId: 'WI-SP-button',
     },
+    personas: {
+        title: 'Personas',
+        panelId: 'PersonaManagement',
+        drawerId: 'persona-management-button',
+    },
     timeline: {
         title: 'Timeline',
         panelId: 'et-timeline-screen',
@@ -40,6 +45,11 @@ export const ET_SCREENS = {
     journal: {
         title: 'Journal',
         panelId: 'et-journal-screen',
+        drawerId: null,
+    },
+    memory: {
+        title: 'Memory',
+        panelId: 'et-memory-screen',
         drawerId: null,
     },
     settings: {
@@ -74,20 +84,10 @@ export const ET_SETTINGS_SECTIONS = {
         panelId: 'Backgrounds',
         drawerId: 'backgrounds-button',
     },
-    personas: {
-        label: 'Personas',
-        panelId: 'PersonaManagement',
-        drawerId: 'persona-management-button',
-    },
     extensions: {
         label: 'Extensions',
         panelId: 'rm_extensions_block',
         drawerId: 'extensions-settings-button',
-    },
-    timeline: {
-        label: 'Timeline',
-        panelId: 'et-timeline-settings',
-        drawerId: null,
     },
 };
 
@@ -246,6 +246,9 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
         if (settingsSection && Object.prototype.hasOwnProperty.call(ET_SETTINGS_SECTIONS, settingsSection)) {
             currentSettingsSection = settingsSection;
         }
+        if (!Object.prototype.hasOwnProperty.call(ET_SETTINGS_SECTIONS, currentSettingsSection)) {
+            currentSettingsSection = 'general';
+        }
     }
 
     const previous = currentScreen;
@@ -290,8 +293,8 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
 
     $('#et-app-nav .et-nav-item').each(function () {
         const itemScreen = this.getAttribute('data-et-screen');
-        // Journal / Timeline are chat-scoped destinations — keep Chat highlighted
-        const chatScoped = screen === 'journal' || screen === 'timeline';
+        // Journal / Timeline / Memory are chat-scoped destinations — keep Chat highlighted
+        const chatScoped = screen === 'journal' || screen === 'timeline' || screen === 'memory';
         const active = itemScreen === screen || (itemScreen === 'chat' && chatScoped);
         this.classList.toggle('is-active', active);
         this.setAttribute('aria-current', active ? 'page' : 'false');
@@ -362,6 +365,15 @@ export function initAppNav() {
         document.body.appendChild(timelineSettings);
     }
 
+    if (!document.getElementById('et-memory-screen')) {
+        const memory = document.createElement('div');
+        memory.id = 'et-memory-screen';
+        memory.className = 'drawer-content closedDrawer';
+        memory.setAttribute('aria-label', 'Memory');
+        memory.innerHTML = '<div id="et-memory-root"></div>';
+        document.body.appendChild(memory);
+    }
+
     if (!document.getElementById('et-app-nav')) {
         const nav = document.createElement('nav');
         nav.id = 'et-app-nav';
@@ -384,6 +396,10 @@ export function initAppNav() {
                     <i class="fa-solid fa-book-atlas" aria-hidden="true"></i>
                     <span>World</span>
                 </button>
+                <button type="button" class="et-nav-item" data-et-screen="personas" role="listitem">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    <span>Personas</span>
+                </button>
                 <button type="button" class="et-nav-item" data-et-screen="connect" role="listitem">
                     <i class="fa-solid fa-plug" aria-hidden="true"></i>
                     <span>Connect</span>
@@ -395,8 +411,8 @@ export function initAppNav() {
             </div>
             <div class="et-nav-meta">
                 <small id="version_display" class="et-nav-version" title="EpicTavern version"></small>
-                <div class="et-nav-phase" title="Next: Memory, visual polish">
-                    <span class="et-nav-phase-pill">Phase 3</span>
+                <div class="et-nav-phase" title="Next: visual polish">
+                    <span class="et-nav-phase-pill">Phase 4</span>
                 </div>
             </div>
         `;
@@ -404,18 +420,35 @@ export function initAppNav() {
     }
 
     // Remove chat-scoped destinations from AppNav (belong in Chat Top Bar)
-    document.querySelectorAll('#et-app-nav [data-et-screen="timeline"], #et-app-nav [data-et-screen="journal"]').forEach((el) => el.remove());
+    document.querySelectorAll('#et-app-nav [data-et-screen="timeline"], #et-app-nav [data-et-screen="journal"], #et-app-nav [data-et-screen="memory"]').forEach((el) => el.remove());
 
-    // Upgrade settings tabs that predate Timeline section
+    // Upgrade older AppNav shells that predate Personas
+    if (document.getElementById('et-app-nav') && !document.querySelector('#et-app-nav [data-et-screen="personas"]')) {
+        const worldBtn = document.querySelector('#et-app-nav [data-et-screen="world"]');
+        const personasBtn = document.createElement('button');
+        personasBtn.type = 'button';
+        personasBtn.className = 'et-nav-item';
+        personasBtn.setAttribute('data-et-screen', 'personas');
+        personasBtn.setAttribute('role', 'listitem');
+        personasBtn.innerHTML = '<i class="fa-solid fa-user" aria-hidden="true"></i><span>Personas</span>';
+        if (worldBtn?.parentElement) {
+            worldBtn.insertAdjacentElement('afterend', personasBtn);
+        }
+    }
+
+    // Drop Timeline / Personas from Settings hub (moved out)
+    document.querySelectorAll('#et-settings-tabs [data-et-settings-section="timeline"], #et-settings-tabs [data-et-settings-section="personas"]').forEach((el) => el.remove());
+
+    // Rebuild settings tabs if they still include removed sections
     const settingsTabs = document.getElementById('et-settings-tabs');
-    if (settingsTabs && !settingsTabs.querySelector('[data-et-settings-section="timeline"]')) {
-        const tab = document.createElement('button');
-        tab.type = 'button';
-        tab.className = 'et-settings-tab';
-        tab.setAttribute('role', 'tab');
-        tab.setAttribute('data-et-settings-section', 'timeline');
-        tab.textContent = 'Timeline';
-        settingsTabs.appendChild(tab);
+    if (settingsTabs) {
+        const allowed = new Set(Object.keys(ET_SETTINGS_SECTIONS));
+        settingsTabs.querySelectorAll('[data-et-settings-section]').forEach((tab) => {
+            const id = tab.getAttribute('data-et-settings-section');
+            if (!allowed.has(id)) {
+                tab.remove();
+            }
+        });
     }
 
     ensureSettingsTabs();

@@ -276,13 +276,12 @@ body.et-shell[data-et-screen]:not([data-et-screen='chat']) #sheld {
 body.et-shell[data-et-screen='connect'] #rm_api_block,
 body.et-shell[data-et-screen='characters'] #right-nav-panel,
 body.et-shell[data-et-screen='world'] #WorldInfo,
+body.et-shell[data-et-screen='personas'] #PersonaManagement,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='timeline'] #et-timeline-settings {
+body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
     display: flex !important;
     flex-direction: column;
     position: fixed !important;
@@ -313,7 +312,8 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='timeline'] #e
 /* Screens without settings tabs sit under AppNav only */
 body.et-shell[data-et-screen='connect'] #rm_api_block,
 body.et-shell[data-et-screen='characters'] #right-nav-panel,
-body.et-shell[data-et-screen='world'] #WorldInfo {
+body.et-shell[data-et-screen='world'] #WorldInfo,
+body.et-shell[data-et-screen='personas'] #PersonaManagement {
     top: var(--et-app-nav-height) !important;
 }
 
@@ -322,9 +322,7 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #us
 body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='timeline'] #et-timeline-settings {
+body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
     top: calc(var(--et-app-nav-height) + var(--et-settings-tabs-height)) !important;
 }
 
@@ -400,11 +398,11 @@ body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
     body.et-shell[data-et-screen='connect'] #rm_api_block,
     body.et-shell[data-et-screen='characters'] #right-nav-panel,
     body.et-shell[data-et-screen='world'] #WorldInfo,
+    body.et-shell[data-et-screen='personas'] #PersonaManagement,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
-    body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
         padding: 1.25rem clamp(1.5rem, 7vw, 2.5rem) 2rem !important;
     }

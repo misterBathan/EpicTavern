@@ -62,6 +62,13 @@ function getIcons() {
             onClick: () => navigate('journal'),
         },
         {
+            id: 'etChatTopBarMemory',
+            icon: 'fa-fw fa-solid fa-brain',
+            position: 'middle',
+            title: t`Memory for this chat`,
+            onClick: () => navigate('memory'),
+        },
+        {
             id: 'etChatTopBarChatManager',
             icon: 'fa-fw fa-solid fa-address-book',
             position: 'right',

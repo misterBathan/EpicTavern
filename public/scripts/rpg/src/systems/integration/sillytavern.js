@@ -593,13 +593,6 @@ export async function onMessageReceived(data) {
                 && shouldRunAutomaticTrackerUpdate(gate);
 
             if (shouldFallbackTrackers) {
-                if (typeof toastr !== 'undefined') {
-                    toastr.info(
-                        `Generating RPG trackers (${gate.reasons[0] || 'update'})…`,
-                        'RPG Companion',
-                        { timeOut: 4000 },
-                    );
-                }
                 const genId = incrementSeparateGenerationId();
                 // First/empty updates always request full enabled sections
                 const sections = (gate.reasons.includes('first_chat_message')

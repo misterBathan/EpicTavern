@@ -1,0 +1,149 @@
+/**
+ * EpicTavern Memory screen.
+ */
+
+#et-memory-screen {
+    display: none;
+}
+
+body.et-shell[data-et-screen='memory'] #et-memory-screen {
+    display: flex !important;
+    flex-direction: column;
+    position: fixed !important;
+    top: var(--et-app-nav-height) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    z-index: 3500 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 1.25rem clamp(1.5rem, 6vw, 5rem) 2rem !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.94)),
+        var(--SmartThemeBlurTintColor, #1c1814);
+    animation: et-screen-in 180ms ease-out;
+    pointer-events: auto;
+}
+
+#et-memory-root {
+    width: 100%;
+    max-width: 52rem;
+    margin: 0 auto;
+}
+
+.et-memory-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.et-memory-title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 650;
+    color: var(--et-parchment, #e8dcc8);
+    letter-spacing: 0.01em;
+}
+
+.et-memory-sub {
+    margin: 0.35rem 0 0;
+    max-width: 36rem;
+    color: rgba(232, 220, 200, 0.72);
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.et-memory-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.et-memory-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem 1.25rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid rgba(196, 163, 90, 0.22);
+    border-bottom: 1px solid rgba(196, 163, 90, 0.22);
+    color: rgba(232, 220, 200, 0.85);
+    font-size: 0.92rem;
+}
+
+.et-memory-toggle,
+.et-memory-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.et-memory-toolbar input[type='number'] {
+    width: 3.5rem;
+}
+
+.et-memory-status {
+    flex: 1 1 100%;
+    margin: 0;
+    font-size: 0.82rem;
+    color: rgba(232, 220, 200, 0.55);
+}
+
+.et-memory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.et-memory-empty {
+    margin: 1.5rem 0;
+    color: rgba(232, 220, 200, 0.55);
+}
+
+.et-memory-card {
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(196, 163, 90, 0.28);
+    background: rgba(255, 248, 235, 0.04);
+}
+
+.et-memory-card.is-pinned {
+    border-color: rgba(196, 163, 90, 0.55);
+    background: rgba(196, 163, 90, 0.08);
+}
+
+.et-memory-card-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.78rem;
+    color: rgba(232, 220, 200, 0.55);
+}
+
+.et-memory-badge {
+    color: var(--et-brass-soft, #c4a35a);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.et-memory-card-text {
+    margin: 0 0 0.75rem;
+    color: var(--et-parchment, #e8dcc8);
+    line-height: 1.45;
+    white-space: pre-wrap;
+}
+
+.et-memory-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}

@@ -288,6 +288,7 @@ import {
 import { initRpgCompanion } from './scripts/rpg/index.js';
 import { initChatTopBar } from './scripts/chat-top-bar/index.js';
 import { initTimelines } from './scripts/timelines/index.js';
+import { initMemory } from './scripts/memory/index.js';
 import { initEtSendFix } from './scripts/et-send-fix.js';
 import { initAccessibility } from './scripts/a11y.js';
 import { applyStreamFadeIn } from './scripts/util/stream-fadein.js';
@@ -812,6 +813,11 @@ async function firstLoadInit() {
         await initTimelines();
     } catch (error) {
         console.error('[EpicTavern] Timelines init failed:', error);
+    }
+    try {
+        await initMemory();
+    } catch (error) {
+        console.error('[EpicTavern] Memory init failed:', error);
     }
     try {
         initEtSendFix();

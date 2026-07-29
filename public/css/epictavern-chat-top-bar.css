@@ -18,6 +18,7 @@ body.et-shell[data-et-screen='chat'] #etChatTopBarSideBar {
 
 /* Chat-scoped destinations (Timeline / Journal) sit with the chat chrome */
 #etChatTopBarTimeline,
-#etChatTopBarJournal {
+#etChatTopBarJournal,
+#etChatTopBarMemory {
     margin-left: 0.15rem;
 }

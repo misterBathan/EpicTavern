@@ -22,45 +22,45 @@ function loadFile(src, type, callback) {
         elem = document.createElement('link');
         elem.rel = 'stylesheet';
         elem.href = src;
-    } else if (type === 'js') {
+        document.head.appendChild(elem);
+        return;
+    }
+
+    if (type === 'js') {
+        // Avoid double-injecting the same vendor script
+        if (document.querySelector(`script[data-et-tl-src="${src}"]`)) {
+            if (callback) callback();
+            return;
+        }
         elem = document.createElement('script');
         elem.src = src;
+        elem.dataset.etTlSrc = src;
         elem.onload = function () {
             if (callback) callback();
         };
-    }
-
-    if (elem) {
+        elem.onerror = function () {
+            console.warn('[EpicTavern Timelines] Failed to load', src);
+            if (callback) callback();
+        };
         document.head.appendChild(elem);
     }
+}
+
+/**
+ * @param {string} src
+ * @returns {Promise<void>}
+ */
+function loadScript(src) {
+    return new Promise((resolve) => loadFile(src, 'js', resolve));
 }
 
 // Keep track of where your extension is located
 const extensionName = 'timelines';
 const extensionFolderPath = `scripts/timelines/`;
 
-// Load CSS file
-loadFile(`${extensionFolderPath}cytoscape-context-menus.min.css`, 'css');
-loadFile(`${extensionFolderPath}light.min.css`, 'css');
-loadFile(`${extensionFolderPath}material.min.css`, 'css');
-loadFile(`${extensionFolderPath}light-border.min.css`, 'css');
-loadFile(`${extensionFolderPath}translucent.min.css`, 'css');
-loadFile(`${extensionFolderPath}tippy.css`, 'css');
-loadFile(`${extensionFolderPath}tl_style.css`, 'css');
-
-// Load JavaScript files (order matters: cytoscape core before plugins)
-loadFile(`${extensionFolderPath}cytoscape.min.js`, 'js', function () {
-    loadFile(`${extensionFolderPath}dagre.js`, 'js', function () {
-        loadFile(`${extensionFolderPath}cytoscape-dagre.min.js`, 'js');
-    });
-    loadFile(`${extensionFolderPath}tippy.umd.min.js`, 'js', function () {
-        loadFile(`${extensionFolderPath}cytoscape-popper.min.js`, 'js');
-    });
-    loadFile(`${extensionFolderPath}cytoscape-context-menus.min.js`, 'js');
-});
-
 import { extension_settings, getContext } from '../extensions.js';
 import { event_types, eventSource, saveSettingsDebounced } from '../../script.js';
+import { Popper } from '../../lib.js';
 
 import { navigateToMessage, closeModal, closeTippy, handleModalDisplay, closeOpenDrawers } from './tl_utils.js';
 import { setupStylesAndData, highlightElements, restoreElements } from './tl_style.js';
@@ -71,6 +71,42 @@ import { fixMarkdown } from '../power-user.js';
 import { hideLoader, showLoader } from '../loader.js';
 import { delay } from '../utils.js';
 import { navigate, getCurrentScreen } from '../app-nav.js';
+
+let vendorLibsPromise = null;
+
+/**
+ * Load Cytoscape / Tippy vendor scripts after Popper is available (avoids blank-page boot races).
+ * @returns {Promise<void>}
+ */
+function ensureTimelineVendorLibs() {
+    if (vendorLibsPromise) {
+        return vendorLibsPromise;
+    }
+
+    vendorLibsPromise = (async () => {
+        // Tippy UMD expects a global Popper
+        if (!('Popper' in window) && Popper) {
+            window.Popper = Popper;
+        }
+
+        loadFile(`${extensionFolderPath}cytoscape-context-menus.min.css`, 'css');
+        loadFile(`${extensionFolderPath}light.min.css`, 'css');
+        loadFile(`${extensionFolderPath}material.min.css`, 'css');
+        loadFile(`${extensionFolderPath}light-border.min.css`, 'css');
+        loadFile(`${extensionFolderPath}translucent.min.css`, 'css');
+        loadFile(`${extensionFolderPath}tippy.css`, 'css');
+        loadFile(`${extensionFolderPath}tl_style.css`, 'css');
+
+        await loadScript(`${extensionFolderPath}cytoscape.min.js`);
+        await loadScript(`${extensionFolderPath}dagre.js`);
+        await loadScript(`${extensionFolderPath}cytoscape-dagre.min.js`);
+        await loadScript(`${extensionFolderPath}tippy.umd.min.js`);
+        await loadScript(`${extensionFolderPath}cytoscape-popper.min.js`);
+        await loadScript(`${extensionFolderPath}cytoscape-context-menus.min.js`);
+    })();
+
+    return vendorLibsPromise;
+}
 
 let defaultSettings = {
     nodeWidth: 25,
@@ -1754,6 +1790,8 @@ export async function initTimelines() {
     if (document.getElementById('timelinesModal') || document.querySelector('.timeline-view-settings')) {
         return;
     }
+
+    await ensureTimelineVendorLibs();
 
     const settingsHtml = await $.get(`${extensionFolderPath}/timeline.html`);
     const settingsHost = document.getElementById('et-timeline-settings')

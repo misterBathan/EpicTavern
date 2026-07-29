@@ -146,6 +146,7 @@ export const extension_settings = {
     disabledExtensions: [],
     expressionOverrides: [],
     memory: {},
+    etMemory: {},
     note: {
         default: '',
         chara: [],
