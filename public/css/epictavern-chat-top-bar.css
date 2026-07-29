@@ -15,3 +15,9 @@ body.et-shell[data-et-screen='chat'] #etChatTopBarSideBar {
     height: calc(100dvh - var(--et-app-nav-height)) !important;
     z-index: 1300;
 }
+
+/* Chat-scoped destinations (Timeline / Journal) sit with the chat chrome */
+#etChatTopBarTimeline,
+#etChatTopBarJournal {
+    margin-left: 0.15rem;
+}

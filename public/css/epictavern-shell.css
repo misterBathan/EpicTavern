@@ -281,7 +281,8 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-na
 body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='timeline'] #et-timeline-settings {
     display: flex !important;
     flex-direction: column;
     position: fixed !important;
@@ -322,7 +323,8 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-na
 body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='personas'] #PersonaManagement,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='timeline'] #et-timeline-settings {
     top: calc(var(--et-app-nav-height) + var(--et-settings-tabs-height)) !important;
 }
 

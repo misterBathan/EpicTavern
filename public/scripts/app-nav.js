@@ -5,8 +5,8 @@
 
 import { eventSource, event_types } from './events.js';
 
-/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'journal' | 'settings'} EtScreen */
-/** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds' | 'personas' | 'extensions'} EtSettingsSection */
+/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'timeline' | 'journal' | 'settings'} EtScreen */
+/** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds' | 'personas' | 'extensions' | 'timeline'} EtSettingsSection */
 
 /**
  * @type {Record<EtScreen, { title: string, panelId: string | null, drawerId: string | null }>}
@@ -31,6 +31,11 @@ export const ET_SCREENS = {
         title: 'World',
         panelId: 'WorldInfo',
         drawerId: 'WI-SP-button',
+    },
+    timeline: {
+        title: 'Timeline',
+        panelId: 'et-timeline-screen',
+        drawerId: null,
     },
     journal: {
         title: 'Journal',
@@ -78,6 +83,11 @@ export const ET_SETTINGS_SECTIONS = {
         label: 'Extensions',
         panelId: 'rm_extensions_block',
         drawerId: 'extensions-settings-button',
+    },
+    timeline: {
+        label: 'Timeline',
+        panelId: 'et-timeline-settings',
+        drawerId: null,
     },
 };
 
@@ -280,7 +290,9 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
 
     $('#et-app-nav .et-nav-item').each(function () {
         const itemScreen = this.getAttribute('data-et-screen');
-        const active = itemScreen === screen;
+        // Journal / Timeline are chat-scoped destinations — keep Chat highlighted
+        const chatScoped = screen === 'journal' || screen === 'timeline';
+        const active = itemScreen === screen || (itemScreen === 'chat' && chatScoped);
         this.classList.toggle('is-active', active);
         this.setAttribute('aria-current', active ? 'page' : 'false');
     });
@@ -333,6 +345,23 @@ export function initAppNav() {
         document.body.appendChild(journal);
     }
 
+    if (!document.getElementById('et-timeline-screen')) {
+        const timeline = document.createElement('div');
+        timeline.id = 'et-timeline-screen';
+        timeline.className = 'drawer-content closedDrawer';
+        timeline.setAttribute('aria-label', 'Timeline');
+        timeline.innerHTML = '<div id="et-timeline-root" class="et-timeline-placeholder">Open a character chat to explore its timeline.</div>';
+        document.body.appendChild(timeline);
+    }
+
+    if (!document.getElementById('et-timeline-settings')) {
+        const timelineSettings = document.createElement('div');
+        timelineSettings.id = 'et-timeline-settings';
+        timelineSettings.className = 'drawer-content closedDrawer';
+        timelineSettings.setAttribute('aria-label', 'Timeline settings');
+        document.body.appendChild(timelineSettings);
+    }
+
     if (!document.getElementById('et-app-nav')) {
         const nav = document.createElement('nav');
         nav.id = 'et-app-nav';
@@ -355,10 +384,6 @@ export function initAppNav() {
                     <i class="fa-solid fa-book-atlas" aria-hidden="true"></i>
                     <span>World</span>
                 </button>
-                <button type="button" class="et-nav-item" data-et-screen="journal" role="listitem">
-                    <i class="fa-solid fa-book-open" aria-hidden="true"></i>
-                    <span>Journal</span>
-                </button>
                 <button type="button" class="et-nav-item" data-et-screen="connect" role="listitem">
                     <i class="fa-solid fa-plug" aria-hidden="true"></i>
                     <span>Connect</span>
@@ -376,6 +401,21 @@ export function initAppNav() {
             </div>
         `;
         document.body.prepend(nav);
+    }
+
+    // Remove chat-scoped destinations from AppNav (belong in Chat Top Bar)
+    document.querySelectorAll('#et-app-nav [data-et-screen="timeline"], #et-app-nav [data-et-screen="journal"]').forEach((el) => el.remove());
+
+    // Upgrade settings tabs that predate Timeline section
+    const settingsTabs = document.getElementById('et-settings-tabs');
+    if (settingsTabs && !settingsTabs.querySelector('[data-et-settings-section="timeline"]')) {
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'et-settings-tab';
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('data-et-settings-section', 'timeline');
+        tab.textContent = 'Timeline';
+        settingsTabs.appendChild(tab);
     }
 
     ensureSettingsTabs();

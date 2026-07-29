@@ -14,6 +14,7 @@ import { debounce_timeout } from '../constants.js';
 import { t } from '../i18n.js';
 import { SVGInject } from '../../lib.js';
 import { addJQueryHighlight } from './jquery-highlight.js';
+import { navigate } from '../app-nav.js';
 
 const movingDivs = /** @type {HTMLDivElement} */ (document.getElementById('movingDivs'));
 const sheld = /** @type {HTMLDivElement} */ (document.getElementById('sheld'));
@@ -45,6 +46,20 @@ function getIcons() {
             title: t`Show connection profiles`,
             isTemporaryAllowed: true,
             onClick: onToggleConnectionProfilesClick,
+        },
+        {
+            id: 'etChatTopBarTimeline',
+            icon: 'fa-fw fa-solid fa-diagram-project',
+            position: 'middle',
+            title: t`Timeline for this chat`,
+            onClick: () => navigate('timeline'),
+        },
+        {
+            id: 'etChatTopBarJournal',
+            icon: 'fa-fw fa-solid fa-book-open',
+            position: 'middle',
+            title: t`Journal for this chat`,
+            onClick: () => navigate('journal'),
         },
         {
             id: 'etChatTopBarChatManager',
