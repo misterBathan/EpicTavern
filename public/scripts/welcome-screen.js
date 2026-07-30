@@ -36,6 +36,7 @@ import { getMessageTimeStamp } from './RossAscends-mods.js';
 import { renderTemplateAsync } from './templates.js';
 import { accountStorage } from './util/AccountStorage.js';
 import { clamp, flashHighlight, isElementInViewport, sortMoments, timestampToMoment } from './utils.js';
+import { navigate } from './app-nav.js';
 
 const assistantAvatarKey = 'assistant';
 const pinnedChatsKey = 'pinnedChats';
@@ -386,6 +387,15 @@ async function sendWelcomePanel(chats, expand = false) {
                 await newAssistantChat({ temporary: true });
                 if (sendTextArea instanceof HTMLTextAreaElement) {
                     sendTextArea.focus();
+                }
+            });
+        });
+        fragment.querySelectorAll('[data-et-welcome-nav]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const screen = button.getAttribute('data-et-welcome-nav');
+                if (screen === 'characters' || screen === 'chat') {
+                    navigate(screen);
                 }
             });
         });

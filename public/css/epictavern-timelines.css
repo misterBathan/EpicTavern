@@ -58,10 +58,34 @@ body.et-shell[data-et-screen='timeline'] #networkContainer {
     padding: 0.75rem !important;
     border: none !important;
     background:
-        linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.96)) !important;
+        linear-gradient(180deg, rgba(22, 18, 14, 0.98), rgba(12, 10, 8, 0.96)) !important;
     color: var(--et-parchment, #e8dfd0) !important;
     box-shadow: none !important;
     text-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body.et-shell[data-et-screen='timeline'] #networkContainer::before {
+    content: 'Timeline';
+    display: block;
+    font-family: var(--et-font-ui, 'Noto Sans', sans-serif);
+    font-size: var(--et-type-xl, 1.45rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--et-parchment, #e8dfd0);
+    margin: 0.15rem 0.35rem 0.15rem;
+    order: -2;
+}
+
+body.et-shell[data-et-screen='timeline'] #networkContainer::after {
+    content: 'Branch and revisit moments in this story.';
+    display: block;
+    font-size: var(--et-type-sm, 0.85rem);
+    color: var(--et-parchment-muted, #b9ae9c);
+    margin: 0 0.35rem 0.85rem;
+    max-width: 36rem;
+    order: -1;
 }
 
 body.et-shell[data-et-screen='timeline'] #timelinesDiagramDiv {

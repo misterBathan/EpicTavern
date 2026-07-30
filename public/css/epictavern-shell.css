@@ -5,26 +5,63 @@
 :root {
     --et-app-nav-height: 3.25rem;
     --et-settings-tabs-height: 2.75rem;
+    --et-scene-tools-height: 2.85rem;
     --et-ink: #12100e;
     --et-ink-elevated: #1c1814;
     --et-ink-soft: #2a241c;
+    --et-ink-deep: #0c0a08;
     --et-brass: #c4a35a;
     --et-brass-soft: #e0c989;
+    --et-brass-dim: #8a7340;
     --et-ember: #d4893a;
+    --et-ember-deep: #a35a1e;
     --et-parchment: #e8dfd0;
     --et-parchment-muted: #b9ae9c;
+    --et-parchment-dim: #8f8575;
     --et-edge: rgba(196, 163, 90, 0.28);
     --et-edge-strong: rgba(196, 163, 90, 0.45);
     --et-glow: rgba(212, 137, 58, 0.22);
     --et-motion: 220ms;
+    --et-motion-slow: 380ms;
+    --et-radius-sm: 0.35rem;
+    --et-radius: 0.55rem;
+    --et-radius-lg: 0.9rem;
+    /* Shared page inset — generous so titles/body never kiss the screen edge */
+    --et-page-margin-x: clamp(2.75rem, 8vw, 6rem);
+    --et-dialogue-measure: min(64rem, calc(100vw - 2 * var(--et-page-margin-x) - var(--et-journal-rail, 0px)));
+    --et-stage-pad-x: var(--et-page-margin-x);
+    --et-content-measure: 100%;
+    --et-journal-rail: 0px;
+    --et-font-ui: 'Noto Sans', sans-serif;
+    --et-font-display: 'Noto Sans', sans-serif;
+    --et-type-xs: 0.72rem;
+    --et-type-sm: 0.85rem;
+    --et-type-base: 0.95rem;
+    --et-type-md: 1.05rem;
+    --et-type-lg: 1.2rem;
+    --et-type-xl: 1.45rem;
+    --et-type-hero: clamp(1.75rem, 3.5vw, 2.35rem);
+    --et-surface-solid: rgba(28, 24, 20, 0.94);
+    --et-surface-glass: rgba(18, 16, 14, 0.72);
+    --et-surface-dialogue: rgba(22, 18, 14, 0.55);
+    --et-vignette: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 35%, rgba(0, 0, 0, 0.55) 100%);
+    --et-warm-edge: radial-gradient(ellipse 90% 55% at 50% 110%, rgba(212, 137, 58, 0.14), transparent 60%);
+}
+
+/* Settings keep a tighter usable width — do not apply the large destination margins */
+body.et-shell[data-et-screen='settings'] {
+    --et-page-margin-x: clamp(1.25rem, 5vw, 3rem);
 }
 
 /* Ambient tavern wash behind exclusive screens */
 body.et-shell {
     background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 137, 58, 0.12), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(196, 163, 90, 0.06), transparent 50%),
-        var(--et-ink);
+        var(--et-warm-edge),
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 137, 58, 0.14), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(196, 163, 90, 0.07), transparent 50%),
+        var(--et-ink-deep);
+    color: var(--et-parchment);
+    font-family: var(--et-font-ui);
 }
 
 @keyframes et-screen-in {
@@ -57,8 +94,11 @@ body.et-shell.reduced-motion *::after {
     left: 0;
     right: 0;
     height: var(--et-app-nav-height);
-    z-index: 5000;
-    display: flex;
+    z-index: 10000;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
     align-items: center;
     gap: 0.75rem;
     padding: 0 0.85rem;
@@ -90,7 +130,8 @@ body.et-shell.reduced-motion *::after {
     border-radius: 0.35rem;
 }
 
-.et-nav-brand:hover .et-nav-brand-text {
+.et-nav-brand:hover .et-nav-brand-text,
+.et-nav-brand.is-active .et-nav-brand-text {
     color: var(--et-brass-soft);
 }
 
@@ -104,6 +145,7 @@ body.et-shell.reduced-motion *::after {
 }
 
 .et-nav-brand-text {
+    font-family: var(--et-font-ui);
     font-weight: 700;
     letter-spacing: 0.04em;
     font-size: 1.05rem;
@@ -128,11 +170,12 @@ body.et-shell.reduced-motion *::after {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.4rem 0.7rem;
-    border-radius: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: var(--et-radius-sm);
     cursor: pointer;
     font: inherit;
-    font-size: 0.9rem;
+    font-size: var(--et-type-sm);
+    letter-spacing: 0.02em;
     white-space: nowrap;
     transition:
         color var(--animation-duration, 0.2s) ease,
@@ -246,23 +289,45 @@ body.et-shell[data-et-screen='settings'] #et-settings-tabs {
 
 /* ---------- Offset existing chrome under AppNav ---------- */
 
+/* Legacy empty #top-bar was the gray rectangle under AppNav (sheldWidth strip) */
 body.et-shell #top-bar {
-    top: var(--et-app-nav-height);
+    display: none !important;
+}
+
+body.et-shell {
+    --topBarBlockSize: 0px;
 }
 
 body.et-shell #top-settings-holder {
     margin-top: var(--et-app-nav-height);
+    width: 100% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 body.et-shell #sheld {
-    top: calc(var(--et-app-nav-height) + var(--topBarBlockSize));
-    height: calc(100dvh - var(--et-app-nav-height) - var(--topBarBlockSize) - 1px);
-    max-height: calc(100dvh - var(--et-app-nav-height) - var(--topBarBlockSize) - 1px);
+    top: var(--et-app-nav-height) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box;
+    position: fixed !important;
 }
 
 body.et-shell .drawer-content:not(.fillLeft):not(.fillRight) {
-    top: calc(var(--et-app-nav-height) + var(--topBarBlockSize));
-    max-height: calc(100dvh - var(--et-app-nav-height) - var(--topBarBlockSize) - var(--bottomFormBlockSize));
+    top: var(--et-app-nav-height);
+    max-height: calc(100dvh - var(--et-app-nav-height) - var(--bottomFormBlockSize));
 }
 
 body.et-shell .fillLeft,
@@ -306,7 +371,7 @@ body.et-shell[data-et-screen='chat'] #top-settings-holder {
 
 /* ---------- Exclusive screens ---------- */
 
-body.et-shell[data-et-screen]:not([data-et-screen='chat']) #sheld {
+body.et-shell[data-et-screen]:not([data-et-screen='chat']):not([data-et-screen='home']) #sheld {
     visibility: hidden;
     pointer-events: none;
 }
@@ -315,11 +380,12 @@ body.et-shell[data-et-screen='connect'] #rm_api_block,
 body.et-shell[data-et-screen='characters'] #right-nav-panel,
 body.et-shell[data-et-screen='world'] #WorldInfo,
 body.et-shell[data-et-screen='personas'] #PersonaManagement,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block,
+body.et-shell[data-et-screen='chats'] #et-chats-screen,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
     display: flex !important;
     flex-direction: column;
     position: fixed !important;
@@ -340,7 +406,7 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] 
     overflow-x: hidden !important;
     overflow-y: auto !important;
     box-sizing: border-box;
-    padding: 1.75rem clamp(5.5rem, 16vw, 14rem) 2.75rem !important;
+    padding: 1.75rem var(--et-page-margin-x) 2.75rem !important;
     background:
         linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.94)),
         var(--SmartThemeBlurTintColor, #1c1814);
@@ -351,16 +417,21 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] 
 body.et-shell[data-et-screen='connect'] #rm_api_block,
 body.et-shell[data-et-screen='characters'] #right-nav-panel,
 body.et-shell[data-et-screen='world'] #WorldInfo,
-body.et-shell[data-et-screen='personas'] #PersonaManagement {
+body.et-shell[data-et-screen='personas'] #PersonaManagement,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block,
+body.et-shell[data-et-screen='chats'] #et-chats-screen {
     top: var(--et-app-nav-height) !important;
+}
+
+body.et-shell:not([data-et-screen='chats']) #et-chats-screen {
+    display: none !important;
 }
 
 /* Settings sections sit under AppNav + section tabs */
 body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
 body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
-body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
+body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
     top: calc(var(--et-app-nav-height) + var(--et-settings-tabs-height)) !important;
 }
 
@@ -426,11 +497,12 @@ body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
     body.et-shell[data-et-screen='characters'] #right-nav-panel,
     body.et-shell[data-et-screen='world'] #WorldInfo,
     body.et-shell[data-et-screen='personas'] #PersonaManagement,
+    body.et-shell[data-et-screen='extensions'] #rm_extensions_block,
+    body.et-shell[data-et-screen='chats'] #et-chats-screen,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
-    body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds,
-    body.et-shell[data-et-screen='settings'][data-et-settings-section='extensions'] #rm_extensions_block {
-        padding: 1.25rem clamp(1.5rem, 7vw, 2.5rem) 2rem !important;
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
+        padding: 1.25rem clamp(1.25rem, 6vw, 2rem) 2rem !important;
     }
 }

@@ -31,7 +31,7 @@ export function renderMemoryScreen(root) {
         <header class="et-memory-header">
             <div>
                 <h1 class="et-memory-title">Memory</h1>
-                <p class="et-memory-sub">Lasting facts extracted by a separate raw API call every N messages — names, prefs, places, promises. Not scene prose.</p>
+                <p class="et-memory-sub">Lasting facts for this chat — names, preferences, places, promises.</p>
             </div>
             <div class="et-memory-actions">
                 <button type="button" class="menu_button" id="et-memory-add" title="Add a manual memory">Add memory</button>

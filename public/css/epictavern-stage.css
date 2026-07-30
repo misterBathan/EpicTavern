@@ -1,0 +1,1617 @@
+/**
+ * EpicTavern stage — VN / tavern presentation layer under AppNav.
+ * Keeps ST contracts: #sheld, #chat, #send_form, #send_textarea, #send_but, .mes
+ */
+
+/* ========== Motion ========== */
+
+@keyframes et-stage-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes et-mes-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes et-send-breathe {
+    0%, 100% {
+        box-shadow:
+            0 0 0 1px var(--et-edge),
+            0 8px 28px rgba(0, 0, 0, 0.35);
+    }
+    50% {
+        box-shadow:
+            0 0 0 1px var(--et-edge-strong),
+            0 8px 32px rgba(212, 137, 58, 0.18),
+            0 0 24px rgba(212, 137, 58, 0.08);
+    }
+}
+
+body.et-shell.reduced-motion #sheld #chat .mes,
+body.et-shell.reduced-motion[data-et-screen] .drawer-content.openDrawer,
+body.et-shell.reduced-motion #send_form.et-send-focused {
+    animation: none !important;
+}
+
+/* ========== Stage atmosphere ========== */
+
+body.et-shell #bg1,
+body.et-shell #bg_custom {
+    filter: saturate(0.85) brightness(0.55) contrast(1.05);
+}
+
+body.et-shell::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        var(--et-vignette),
+        var(--et-warm-edge);
+}
+
+body.et-shell #sheld {
+    position: fixed !important;
+    z-index: 1100;
+}
+
+body.et-shell #top-bar,
+body.et-shell #top-settings-holder {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========== Neutralize stock ST chrome ========== */
+
+body.et-shell #sheld {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+body.et-shell #sheldheader {
+    display: none !important;
+}
+
+body.et-shell #chat {
+    background: transparent !important;
+    border: none !important;
+    padding: 0.75rem var(--et-stage-pad-x) 1.25rem !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+body.et-shell #form_sheld {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 var(--et-stage-pad-x) max(0.85rem, env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box;
+}
+
+body.et-shell .menu_button,
+body.et-shell .right_menu_button {
+    border-radius: var(--et-radius-sm) !important;
+    border-color: var(--et-edge) !important;
+    background: rgba(42, 36, 28, 0.75) !important;
+    color: var(--et-parchment) !important;
+    transition:
+        background var(--et-motion) ease,
+        border-color var(--et-motion) ease,
+        color var(--et-motion) ease;
+}
+
+body.et-shell .menu_button:hover,
+body.et-shell .right_menu_button:hover {
+    background: rgba(196, 163, 90, 0.16) !important;
+    border-color: var(--et-edge-strong) !important;
+    color: var(--et-brass-soft) !important;
+    filter: none !important;
+}
+
+body.et-shell select,
+body.et-shell input[type='text'],
+body.et-shell input[type='search'],
+body.et-shell input[type='number'],
+body.et-shell textarea:not(#send_textarea) {
+    border-radius: var(--et-radius-sm) !important;
+    border-color: var(--et-edge) !important;
+    background: rgba(12, 10, 8, 0.55) !important;
+    color: var(--et-parchment) !important;
+}
+
+body.et-shell .drawer-content.openDrawer {
+    animation: et-stage-fade var(--et-motion-slow) ease-out;
+}
+
+/* ========== ST section cards → stage language ========== */
+
+body.et-shell .inline-drawer,
+body.et-shell #extensions_settings .inline-drawer,
+body.et-shell #extensions_settings2 .inline-drawer {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    overflow: visible;
+    margin: 0 0 0.75rem !important;
+    padding: 0 !important;
+}
+
+body.et-shell .standoutHeader,
+body.et-shell .title_restorable,
+body.et-shell h4.title_restorable,
+body.et-shell #user-settings-block h4,
+body.et-shell #UI-presets-block,
+body.et-shell #UI-presets-block .title_restorable,
+body.et-shell #UI-presets-block h4 {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+    background: rgba(28, 24, 20, 0.55) !important;
+    background-image: none !important;
+    background-color: rgba(28, 24, 20, 0.55) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    overflow: hidden;
+}
+
+body.et-shell .inline-drawer-header,
+body.et-shell .standoutHeader,
+body.et-shell .title_restorable,
+body.et-shell h4.title_restorable,
+body.et-shell #user-settings-block h4,
+body.et-shell #extensions_settings .inline-drawer-toggle.inline-drawer-header,
+body.et-shell #extensions_settings2 .inline-drawer-toggle.inline-drawer-header,
+body.et-shell #UI-presets-block h4 {
+    font-family: var(--et-font-ui) !important;
+    font-weight: 650 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.01em !important;
+    color: var(--et-parchment) !important;
+    background: rgba(12, 10, 8, 0.45) !important;
+    background-image: none !important;
+    background-color: rgba(12, 10, 8, 0.45) !important;
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+    padding: 0.7rem 0.9rem !important;
+    margin: 0 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+body.et-shell .inline-drawer-header:hover,
+body.et-shell .standoutHeader.inline-drawer-header:hover,
+body.et-shell #extensions_settings .inline-drawer-toggle.inline-drawer-header:hover,
+body.et-shell #extensions_settings2 .inline-drawer-toggle.inline-drawer-header:hover,
+body.et-shell #user-settings-block h4:hover {
+    background: rgba(196, 163, 90, 0.1) !important;
+    background-image: none !important;
+    color: var(--et-brass-soft) !important;
+    filter: none !important;
+}
+
+/* Content only gets chrome when open (jQuery sets display:block) — avoids bottom shelf when collapsed */
+body.et-shell .inline-drawer-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+}
+
+body.et-shell .inline-drawer-content[style*='display: block'],
+body.et-shell .inline-drawer-content[style*='display:block'] {
+    padding: 0.85rem 0.95rem 1.1rem !important;
+    margin: 0.45rem 0 0 !important;
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+}
+
+/* ST often leaves an empty bordered sibling under standout headers */
+body.et-shell .standoutHeader ~ .inline-drawer-content:not([style*='display: block']):not([style*='display:block']) {
+    display: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.et-shell .inline-drawer-icon {
+    color: var(--et-parchment-muted) !important;
+}
+
+/* Kill glossy ST chrome leftovers */
+body.et-shell .standoutHeader::before,
+body.et-shell .standoutHeader::after,
+body.et-shell .title_restorable::before,
+body.et-shell .title_restorable::after,
+body.et-shell #user-settings-block h4::before,
+body.et-shell #user-settings-block h4::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+
+/* ========== Chat / Home stage layout ========== */
+
+body.et-shell[data-et-screen='chat'] #sheld,
+body.et-shell[data-et-screen='home'] #sheld {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    top: var(--et-app-nav-height) !important;
+    bottom: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+body.et-shell[data-et-screen='chat'] #chat,
+body.et-shell[data-et-screen='home'] #chat {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scroll-behavior: smooth;
+    padding: 0.75rem var(--et-page-margin-x) 1.25rem !important;
+    box-sizing: border-box !important;
+}
+
+body.et-shell[data-et-screen='chat'] #chat > .mes,
+body.et-shell[data-et-screen='chat'] #chat > .last_mes {
+    width: 100%;
+    max-width: var(--et-dialogue-measure);
+}
+
+/* Chat library vs active conversation — Chats is its own screen now.
+   Keep these as safety nets if welcomePanel appears under chat by mistake. */
+body.et-shell[data-et-screen='home'] #etChatTopBar,
+body.et-shell[data-et-screen='home'] #etChatTopBarConnectionProfiles,
+body.et-shell[data-et-screen='home'] #etChatTopBarSideBar,
+body.et-shell[data-et-screen='chats'] #etChatTopBar,
+body.et-shell[data-et-screen='chats'] #etChatTopBarConnectionProfiles,
+body.et-shell[data-et-screen='chats'] #etChatTopBarSideBar {
+    display: none !important;
+}
+
+body.et-shell[data-et-screen='chat'] #etChatTopBar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: var(--et-scene-tools-height) !important;
+    min-height: var(--et-scene-tools-height) !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    z-index: 20;
+}
+
+/* Home / Chats: never show conversation chrome */
+body.et-shell[data-et-screen='home'] #form_sheld,
+body.et-shell[data-et-screen='home'] #rpg-companion-panel,
+body.et-shell[data-et-screen='home'] #rpg-mobile-toggle,
+body.et-shell[data-et-screen='home'] #rpg-plot-buttons,
+body.et-shell[data-et-screen='home'] #chat > .mes,
+body.et-shell[data-et-screen='chats'] #form_sheld,
+body.et-shell[data-et-screen='chats'] #rpg-companion-panel,
+body.et-shell[data-et-screen='chats'] #rpg-mobile-toggle,
+body.et-shell[data-et-screen='chats'] #rpg-plot-buttons,
+body.et-shell[data-et-screen='chats'] #rpg-thought-panel,
+body.et-shell[data-et-screen='chats'] #rpg-thought-icon,
+body.et-shell[data-et-screen='chats'] #rpg-alt-present-characters {
+    display: none !important;
+}
+
+/* Hide leftover ST welcome chrome (gear / collapse) — AppNav covers navigation */
+body.et-shell #chat .welcomePanel .welcomeHeaderTitle .mes_button,
+body.et-shell #chat .welcomePanel .showRecentChats,
+body.et-shell #chat .welcomePanel .recentChatsSettings,
+body.et-shell #chat .welcomePanel .hideRecentChats {
+    display: none !important;
+}
+
+/* Orphan delete-mode strip stays hidden until ST sets display:block */
+body.et-shell #dialogue_del_mes {
+    display: none;
+}
+
+/* Kill floating zoomed avatars / expression flash on non-chat screens */
+body.et-shell:not([data-et-screen='chat']) .zoomed_avatar,
+body.et-shell:not([data-et-screen='chat']) .zoomed_avatar_container,
+body.et-shell[data-et-screen='characters'] .zoomed_avatar,
+body.et-shell[data-et-screen='home'] .zoomed_avatar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Character edit avatar should stay inside the form — never float over the stage */
+body.et-shell[data-et-screen='characters'] #avatar_div {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+}
+
+body.et-shell[data-et-screen='characters'] #avatar_load_preview {
+    max-width: 6rem;
+    max-height: 6rem;
+}
+
+/* Hotswap / expression portraits must not paint into empty stage during screen fades */
+body.et-shell:not([data-et-screen='chat']) #expression-wrapper,
+body.et-shell:not([data-et-screen='chat']) #expression-image,
+body.et-shell:not([data-et-screen='chat']) .expression-holder,
+body.et-shell[data-et-screen='characters'] .hotswap,
+body.et-shell[data-et-screen='characters'] #HotSwapWrapper {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Soften screen fade so orphaned portraits don't flash mid-transition */
+body.et-shell[data-et-screen='characters'] #right-nav-panel.openDrawer,
+body.et-shell[data-et-screen='characters'] #right-nav-panel {
+    animation: et-stage-fade 220ms ease-out !important;
+}
+
+/* Hide stale welcome chrome if it somehow remains during an active chat */
+body.et-shell[data-et-screen='chat']:has(#chat > .mes[mesid]) #chat > .welcomePanel {
+    display: none !important;
+}
+
+body.et-shell[data-et-screen='chat'] #form_sheld {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    justify-content: center;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 var(--et-page-margin-x) max(0.85rem, env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    z-index: 1200;
+}
+
+/* VN dialogue beats */
+body.et-shell #chat .mes {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.65rem;
+    margin: 0 0 1.15rem !important;
+    padding: 0.85rem 1rem 1rem !important;
+    width: 100% !important;
+    max-width: var(--et-dialogue-measure);
+    background: var(--et-surface-dialogue) !important;
+    border: 1px solid transparent !important;
+    border-bottom: 1px solid rgba(196, 163, 90, 0.14) !important;
+    border-radius: var(--et-radius) !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: et-mes-enter var(--et-motion-slow) ease-out;
+    box-sizing: border-box;
+}
+
+body.et-shell #chat .mes:hover {
+    border-color: rgba(196, 163, 90, 0.22) !important;
+    background: rgba(28, 24, 20, 0.62) !important;
+}
+
+body.et-shell #chat .mes[is_user='true'] {
+    background: rgba(212, 137, 58, 0.08) !important;
+    border-bottom-color: rgba(212, 137, 58, 0.22) !important;
+}
+
+body.et-shell #chat .mes .mesAvatarWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding-top: 0.15rem;
+    flex: 0 0 auto;
+}
+
+body.et-shell #chat .mes .mesAvatarWrapper .avatar {
+    width: 3.1rem !important;
+    height: 3.1rem !important;
+    min-width: 3.1rem !important;
+    min-height: 3.1rem !important;
+    max-width: 3.1rem !important;
+    max-height: 3.1rem !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    border: 1px solid var(--et-edge) !important;
+    overflow: hidden !important;
+    flex: 0 0 3.1rem !important;
+    box-shadow: 0 0 0 2px rgba(12, 10, 8, 0.45);
+}
+
+body.et-shell #chat .mes .mesAvatarWrapper .avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+}
+
+/* Keep expression / zoomed portraits from stretching into tall columns */
+body.et-shell[data-et-screen='chat'] #expression-wrapper,
+body.et-shell[data-et-screen='chat'] .expression-holder {
+    max-height: 72vh !important;
+}
+
+body.et-shell[data-et-screen='chat'] #expression-image,
+body.et-shell[data-et-screen='chat'] .expression-holder img,
+body.et-shell[data-et-screen='chat'] .zoomed_avatar img {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 72vh !important;
+    object-fit: contain !important;
+    object-position: bottom center !important;
+}
+
+body.et-shell #chat .mes .mesIDDisplay,
+body.et-shell #chat .mes .mes_timer,
+body.et-shell #chat .mes .tokenCounterDisplay {
+    opacity: 0.45;
+    font-size: var(--et-type-xs);
+    color: var(--et-parchment-dim);
+}
+
+body.et-shell #chat .mes .mes_block {
+    min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 0 0 0.15rem !important;
+}
+
+body.et-shell #chat .mes .ch_name {
+    margin: 0 !important;
+    align-items: baseline !important;
+}
+
+body.et-shell #chat .mes .name_text {
+    font-family: var(--et-font-display) !important;
+    font-weight: 600;
+    font-size: var(--et-type-lg);
+    letter-spacing: 0.03em;
+    color: var(--et-brass-soft) !important;
+    line-height: 1.15;
+}
+
+body.et-shell #chat .mes[is_user='true'] .name_text {
+    color: var(--et-ember) !important;
+}
+
+body.et-shell #chat .mes .timestamp {
+    margin-left: 0.55rem;
+    font-size: var(--et-type-xs);
+    color: var(--et-parchment-dim);
+    opacity: 0.7;
+}
+
+body.et-shell #chat .mes .mes_text {
+    font-family: var(--et-font-ui);
+    font-size: var(--et-type-md);
+    line-height: 1.65;
+    color: var(--et-parchment);
+    max-width: 100%;
+}
+
+body.et-shell #chat .mes .mes_text p {
+    margin: 0 0 0.65em;
+}
+
+body.et-shell #chat .mes .mes_text p:last-child {
+    margin-bottom: 0;
+}
+
+/* Quiet secondary actions */
+body.et-shell #chat .mes .mes_buttons {
+    opacity: 0;
+    transition: opacity var(--et-motion) ease;
+    gap: 0.2rem !important;
+}
+
+body.et-shell #chat .mes:hover .mes_buttons,
+body.et-shell #chat .mes:focus-within .mes_buttons,
+body.et-shell #chat .last_mes .mes_buttons {
+    opacity: 0.85;
+}
+
+body.et-shell #chat .mes .mes_button {
+    color: var(--et-parchment-dim) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 0.9rem !important;
+    width: 1.65rem;
+    height: 1.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--et-radius-sm);
+}
+
+body.et-shell #chat .mes .mes_button:hover {
+    color: var(--et-brass-soft) !important;
+    background: rgba(196, 163, 90, 0.12) !important;
+}
+
+body.et-shell #chat .mes .extraMesButtons {
+    gap: 0.15rem;
+}
+
+body.et-shell #chat .mes .swipe_left,
+body.et-shell #chat .mes .swipe_right {
+    opacity: 0.35;
+    color: var(--et-brass) !important;
+    transition: opacity var(--et-motion) ease;
+    align-self: center;
+}
+
+body.et-shell #chat .mes:hover .swipe_left,
+body.et-shell #chat .mes:hover .swipe_right,
+body.et-shell #chat .last_mes .swipe_left,
+body.et-shell #chat .last_mes .swipe_right {
+    opacity: 0.8;
+}
+
+body.et-shell #chat .mes .swipes-counter {
+    font-size: var(--et-type-xs);
+    color: var(--et-parchment-dim);
+}
+
+/* ========== Send dock — one composed bar ========== */
+
+body.et-shell[data-et-screen='chat'] #send_form {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: var(--et-dialogue-measure) !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    background: var(--et-surface-solid) !important;
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius-lg) !important;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.25),
+        0 10px 32px rgba(0, 0, 0, 0.4) !important;
+    overflow: hidden;
+}
+
+body.et-shell[data-et-screen='chat'] #send_form #extension-buttons-wrapper {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0.45rem 0.65rem 0.4rem !important;
+    text-align: left !important;
+    border-bottom: 1px solid rgba(196, 163, 90, 0.14);
+    background: rgba(12, 10, 8, 0.28);
+    box-sizing: border-box;
+}
+
+body.et-shell[data-et-screen='chat'] #send_form #extension-buttons-wrapper:empty {
+    display: none !important;
+}
+
+body.et-shell[data-et-screen='chat'] #send_form #rpg-plot-buttons {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-start;
+    align-items: center;
+    width: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+body.et-shell[data-et-screen='chat'] #send_form #rpg-plot-buttons .menu_button,
+body.et-shell[data-et-screen='chat'] #send_form #rpg-plot-random,
+body.et-shell[data-et-screen='chat'] #send_form #rpg-plot-natural,
+body.et-shell[data-et-screen='chat'] #send_form #rpg-enter-encounter {
+    margin: 0 !important;
+    height: 1.85rem;
+    padding: 0 0.65rem !important;
+    font-size: 0.78rem !important;
+    border-radius: var(--et-radius-sm) !important;
+    border: 1px solid var(--et-edge) !important;
+    background: rgba(28, 24, 20, 0.85) !important;
+    background-color: rgba(28, 24, 20, 0.85) !important;
+    color: var(--et-parchment) !important;
+}
+
+body.et-shell[data-et-screen='chat'] #nonQRFormItems {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0.5rem 0.6rem 0.55rem !important;
+    background: transparent !important;
+    border: none !important;
+    box-sizing: border-box;
+}
+
+body.et-shell[data-et-screen='chat'] #leftSendForm {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.3rem;
+    padding: 0 !important;
+    flex: 0 0 auto;
+}
+
+body.et-shell[data-et-screen='chat'] #options_button,
+body.et-shell[data-et-screen='chat'] #leftSendForm .menu_button,
+body.et-shell[data-et-screen='chat'] #mes_prompt {
+    width: 2.15rem;
+    height: 2.15rem;
+    margin: 0;
+}
+
+body.et-shell[data-et-screen='chat'] #send_textarea {
+    flex: 1 1 auto !important;
+    min-height: 2.35rem !important;
+    align-self: center;
+}
+
+body.et-shell[data-et-screen='chat'] #rightSendForm {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    flex: 0 0 auto;
+}
+
+body.et-shell #send_form.et-send-focused,
+body.et-shell #send_form:focus-within {
+    border-color: var(--et-edge-strong) !important;
+    animation: et-send-breathe 2.8s ease-in-out infinite;
+}
+
+body.et-shell #nonQRFormItems {
+    display: flex !important;
+    align-items: flex-end;
+    gap: 0.55rem;
+    width: 100%;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+body.et-shell #leftSendForm {
+    display: flex;
+    flex-direction: row;
+    gap: 0.35rem;
+    align-items: center;
+    padding-bottom: 0;
+}
+
+body.et-shell #options_button {
+    width: 2.15rem;
+    height: 2.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--et-radius-sm);
+    border: 1px solid var(--et-edge);
+    background: rgba(12, 10, 8, 0.45);
+    color: var(--et-parchment-muted);
+    font-size: 0.95rem;
+}
+
+body.et-shell #options_button:hover {
+    color: var(--et-brass-soft);
+    border-color: var(--et-edge-strong);
+}
+
+body.et-shell #send_textarea {
+    flex: 1 1 auto !important;
+    min-height: 2.75rem !important;
+    max-height: 10rem !important;
+    margin: 0 !important;
+    padding: 0.7rem 0.85rem !important;
+    border: none !important;
+    border-radius: var(--et-radius) !important;
+    background: rgba(12, 10, 8, 0.55) !important;
+    color: var(--et-parchment) !important;
+    font-family: var(--et-font-ui) !important;
+    font-size: var(--et-type-base) !important;
+    line-height: 1.45 !important;
+    resize: none;
+    box-shadow: inset 0 0 0 1px transparent;
+    transition: box-shadow var(--et-motion) ease, background var(--et-motion) ease;
+}
+
+body.et-shell #send_textarea:focus {
+    outline: none !important;
+    background: rgba(12, 10, 8, 0.72) !important;
+    box-shadow: inset 0 0 0 1px var(--et-edge-strong);
+}
+
+body.et-shell #send_textarea::placeholder {
+    color: var(--et-parchment-dim);
+}
+
+body.et-shell #rightSendForm {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.35rem;
+    padding-bottom: 0.15rem;
+    min-width: auto !important;
+}
+
+body.et-shell #mes_impersonate,
+body.et-shell #mes_continue {
+    width: 2.1rem;
+    height: 2.1rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--et-radius-sm);
+    border: 1px solid transparent;
+    color: var(--et-parchment-muted);
+    background: transparent;
+    opacity: 0.85;
+}
+
+body.et-shell #mes_impersonate:not(.displayNone),
+body.et-shell #mes_continue:not(.displayNone) {
+    display: inline-flex !important;
+}
+
+body.et-shell #mes_impersonate:hover,
+body.et-shell #mes_continue:hover {
+    color: var(--et-brass-soft);
+    border-color: var(--et-edge);
+    background: rgba(196, 163, 90, 0.1);
+}
+
+body.et-shell #send_but {
+    width: 2.55rem !important;
+    height: 2.55rem !important;
+    min-width: 2.55rem !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    border: 1px solid rgba(0, 0, 0, 0.25) !important;
+    background: linear-gradient(165deg, var(--et-brass-soft), var(--et-brass) 55%, var(--et-ember-deep)) !important;
+    color: var(--et-ink) !important;
+    font-size: 1.05rem !important;
+    box-shadow: 0 4px 14px rgba(212, 137, 58, 0.28);
+    transition: transform var(--et-motion) ease, box-shadow var(--et-motion) ease, filter var(--et-motion) ease;
+}
+
+body.et-shell #send_but:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(212, 137, 58, 0.4);
+    filter: brightness(1.05);
+}
+
+body.et-shell #send_but:active {
+    transform: translateY(0);
+}
+
+body.et-shell #mes_stop {
+    color: #e07070;
+}
+
+body.et-shell #dialogue_del_mes {
+    max-width: var(--et-dialogue-measure);
+    margin: 0 auto 0.5rem;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+body.et-shell #dialogue_del_mes[style*='display: block'],
+body.et-shell #dialogue_del_mes[style*='display:block'] {
+    display: flex !important;
+}
+
+/* ========== Welcome title card ========== */
+
+body.et-shell #chat .welcomePanel {
+    margin: 1.5rem auto 2rem !important;
+    padding: 2rem 1.5rem 1.5rem !important;
+    gap: 1.1rem !important;
+    background:
+        linear-gradient(165deg, rgba(42, 36, 28, 0.88), rgba(18, 16, 14, 0.92)),
+        var(--et-ink-elevated) !important;
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius-lg) !important;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 18px 48px rgba(0, 0, 0, 0.45) !important;
+    animation: et-stage-fade var(--et-motion-slow) ease-out;
+}
+
+body.et-shell #chat .welcomePanel .welcomeHeaderTitle {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+    gap: 0.35rem !important;
+    position: relative;
+}
+
+body.et-shell #chat .welcomePanel .welcomeHeaderLogo {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    margin-bottom: 0.25rem;
+    filter: drop-shadow(0 0 12px rgba(196, 163, 90, 0.35));
+}
+
+body.et-shell #chat .welcomePanel .welcomeBrandTitle {
+    font-family: var(--et-font-display);
+    font-weight: 700;
+    font-size: var(--et-type-hero);
+    letter-spacing: 0.08em;
+    color: var(--et-parchment);
+    line-height: 1.05;
+    margin: 0;
+}
+
+body.et-shell #chat .welcomePanel .welcomeTagline {
+    margin: 0.15rem 0 0;
+    font-size: var(--et-type-sm);
+    color: var(--et-parchment-muted);
+    letter-spacing: 0.04em;
+    max-width: 28rem;
+}
+
+body.et-shell #chat .welcomePanel .welcomeHeaderVersionDisplay {
+    font-size: var(--et-type-xs) !important;
+    font-weight: 500 !important;
+    color: var(--et-parchment-dim) !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex-grow: 0 !important;
+}
+
+body.et-shell #chat .welcomePanel .welcomeHeaderTitle .mes_button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.55;
+}
+
+body.et-shell #chat .welcomePanel .welcomeHeaderTitle .mes_button:hover {
+    opacity: 1;
+}
+
+body.et-shell #chat .welcomePanel .welcomeHeader {
+    justify-content: center !important;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+body.et-shell #chat .welcomePanel .recentChatsTitle {
+    width: 100%;
+    text-align: center;
+    font-family: var(--et-font-display);
+    font-size: var(--et-type-lg);
+    color: var(--et-brass-soft);
+    letter-spacing: 0.04em;
+    margin: 0 0 0.65rem;
+}
+
+body.et-shell #chat .welcomePanel .welcomeShortcuts {
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+body.et-shell #chat .welcomePanel .welcomeShortcuts .menu_button,
+body.et-shell #chat .welcomePanel .welcomePrimaryCta {
+    border-radius: var(--et-radius) !important;
+    padding: 0.55rem 1rem !important;
+}
+
+body.et-shell #chat .welcomePanel .welcomePrimaryCta {
+    background: linear-gradient(165deg, var(--et-brass-soft), var(--et-brass)) !important;
+    color: var(--et-ink) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+body.et-shell #chat .welcomePanel .welcomePrimaryCta:hover {
+    filter: brightness(1.06);
+}
+
+body.et-shell #chat .welcomePanel .welcomeShortcutsSeparator,
+body.et-shell #chat .welcomePanel .welcomeShortcuts a[href*='sillytavern'],
+body.et-shell #chat .welcomePanel .welcomeShortcuts a[href*='discord.gg/sillytavern'] {
+    display: none !important;
+}
+
+body.et-shell #chat .welcomeRecent .recentChat {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+    padding: 0.7rem 0.85rem !important;
+    margin: 0 0 0.55rem !important;
+    background: rgba(28, 24, 20, 0.75) !important;
+    transition: border-color var(--et-motion) ease, background var(--et-motion) ease, transform var(--et-motion) ease;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+body.et-shell #chat .welcomeRecent .recentChat:hover {
+    background: rgba(196, 163, 90, 0.12) !important;
+    border-color: var(--et-edge-strong) !important;
+    transform: translateY(-2px);
+}
+
+body.et-shell #chat .welcomeRecent .recentChat .avatar {
+    width: 3rem !important;
+    height: 3rem !important;
+    min-width: 3rem !important;
+    border-radius: 50% !important;
+    overflow: hidden;
+    flex: 0 0 3rem;
+}
+
+body.et-shell #chat .welcomeRecent .recentChat .avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+body.et-shell #chat .welcomeRecent .recentChatInfo {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+body.et-shell #chat .welcomeRecent .chatNameContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.65rem;
+    margin-bottom: 0.25rem;
+}
+
+body.et-shell #chat .welcomeRecent .chatName {
+    flex: 1 1 12rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.et-shell #chat .welcomeRecent .characterName {
+    font-family: var(--et-font-display);
+    font-size: 1rem;
+    color: var(--et-parchment);
+}
+
+body.et-shell #chat .welcomeRecent .chatMessage {
+    color: var(--et-parchment-muted);
+    font-size: var(--et-type-sm);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* ========== Scene tools: Chat Top Bar ========== */
+
+body.et-shell[data-et-screen='chat'] #etChatTopBar {
+    display: flex !important;
+    height: var(--et-scene-tools-height) !important;
+    min-height: var(--et-scene-tools-height) !important;
+    width: 100% !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    padding: 0 var(--et-page-margin-x) !important;
+    border: none !important;
+    border-bottom: 1px solid var(--et-edge) !important;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.94), rgba(18, 16, 14, 0.9)) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    gap: 0.35rem !important;
+    box-sizing: border-box !important;
+    position: relative;
+    z-index: 20;
+}
+
+body.et-shell #etChatTopBar .right_menu_button {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--et-radius-sm) !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: var(--et-parchment-muted) !important;
+}
+
+body.et-shell #etChatTopBar .right_menu_button:hover {
+    color: var(--et-brass-soft) !important;
+    border-color: var(--et-edge) !important;
+    background: rgba(196, 163, 90, 0.1) !important;
+}
+
+body.et-shell #etChatTopBarChatName {
+    font-family: var(--et-font-display) !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 0.03em;
+    border: none !important;
+    background: transparent !important;
+    color: var(--et-parchment) !important;
+}
+
+body.et-shell #etChatTopBarSearchInput,
+body.et-shell #etChatTopBarConnectionProfilesSelect {
+    border-radius: var(--et-radius-sm) !important;
+    border: 1px solid var(--et-edge) !important;
+    background: rgba(12, 10, 8, 0.5) !important;
+    color: var(--et-parchment) !important;
+    font-size: var(--et-type-sm) !important;
+}
+
+/* ========== Scene tools: Journal HUD ========== */
+
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel.rpg-panel {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) 0 0 var(--et-radius) !important;
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.96), rgba(18, 16, 14, 0.94)) !important;
+    box-shadow: -8px 0 28px rgba(0, 0, 0, 0.35) !important;
+    color: var(--et-parchment) !important;
+}
+
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-header,
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-title {
+    font-family: var(--et-font-display) !important;
+    color: var(--et-brass-soft) !important;
+    letter-spacing: 0.04em;
+}
+
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-section {
+    border-color: var(--et-edge) !important;
+    background: rgba(12, 10, 8, 0.35) !important;
+    border-radius: var(--et-radius-sm) !important;
+}
+
+body.et-shell[data-et-screen='chat'] #rpg-mobile-toggle {
+    border: 1px solid var(--et-edge) !important;
+    background: var(--et-surface-solid) !important;
+    color: var(--et-brass-soft) !important;
+    border-radius: var(--et-radius) !important;
+}
+
+/* ========== Destination screen shells ========== */
+
+body.et-shell[data-et-screen='connect'] #rm_api_block,
+body.et-shell[data-et-screen='characters'] #right-nav-panel,
+body.et-shell[data-et-screen='world'] #WorldInfo,
+body.et-shell[data-et-screen='personas'] #PersonaManagement,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block,
+body.et-shell[data-et-screen='chats'] #et-chats-screen,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
+    padding: 1.75rem var(--et-page-margin-x) 2.75rem !important;
+    background:
+        linear-gradient(180deg, rgba(22, 18, 14, 0.97), rgba(12, 10, 8, 0.95)),
+        var(--et-ink-deep) !important;
+    border-top: 1px solid var(--et-edge) !important;
+    animation: et-stage-fade var(--et-motion-slow) ease-out !important;
+    align-items: stretch !important;
+    gap: 1.1rem !important;
+}
+
+/* One content column: title + body share the same horizontal measure */
+body.et-shell[data-et-screen='connect'] #rm_api_block > *,
+body.et-shell[data-et-screen='characters'] #right-nav-panel > *,
+body.et-shell[data-et-screen='world'] #WorldInfo > *,
+body.et-shell[data-et-screen='personas'] #PersonaManagement > *,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block > *,
+body.et-shell[data-et-screen='connect'] #rm_api_block::before,
+body.et-shell[data-et-screen='connect'] #rm_api_block::after,
+body.et-shell[data-et-screen='characters'] #right-nav-panel::before,
+body.et-shell[data-et-screen='characters'] #right-nav-panel::after,
+body.et-shell[data-et-screen='world'] #WorldInfo::before,
+body.et-shell[data-et-screen='world'] #WorldInfo::after,
+body.et-shell[data-et-screen='personas'] #PersonaManagement::before,
+body.et-shell[data-et-screen='personas'] #PersonaManagement::after,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block::before,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block::after {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+body.et-shell[data-et-screen='extensions'] .extensions_block {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem !important;
+    align-items: flex-start;
+}
+
+body.et-shell[data-et-screen='extensions'] #extensions_settings,
+body.et-shell[data-et-screen='extensions'] #extensions_settings2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    flex: 1 1 18rem;
+    min-width: min(100%, 18rem);
+    width: auto !important;
+    max-width: 100% !important;
+}
+
+body.et-shell[data-et-screen='extensions'] #extensions_settings .inline-drawer,
+body.et-shell[data-et-screen='extensions'] #extensions_settings2 .inline-drawer {
+    margin: 0 !important;
+}
+
+body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
+body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
+    align-items: stretch !important;
+}
+
+body.et-shell[data-et-screen='connect'] #rm_api_block .range-block,
+body.et-shell[data-et-screen='connect'] #rm_api_block .flex-container,
+body.et-shell[data-et-screen='personas'] #PersonaManagement .range-block,
+body.et-shell[data-et-screen='personas'] #PersonaManagement .flex-container.flexFlowColumn,
+body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
+    margin-bottom: 0.85rem;
+}
+
+body.et-shell[data-et-screen='connect'] #rm_api_block label,
+body.et-shell[data-et-screen='connect'] #rm_api_block h4,
+body.et-shell[data-et-screen='personas'] #PersonaManagement label,
+body.et-shell[data-et-screen='world'] #WorldInfo label {
+    margin-top: 0.35rem;
+}
+
+/* Destination screen titles (pseudo headers pinned to top of flex panels) */
+body.et-shell[data-et-screen='characters'] #right-nav-panel::before,
+body.et-shell[data-et-screen='world'] #WorldInfo::before,
+body.et-shell[data-et-screen='connect'] #rm_api_block::before,
+body.et-shell[data-et-screen='personas'] #PersonaManagement::before,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block::before {
+    display: block;
+    font-family: var(--et-font-ui);
+    font-size: var(--et-type-xl);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--et-parchment);
+    margin: 0 0 0.25rem;
+    order: -2;
+}
+
+body.et-shell[data-et-screen='characters'] #right-nav-panel::after,
+body.et-shell[data-et-screen='world'] #WorldInfo::after,
+body.et-shell[data-et-screen='connect'] #rm_api_block::after,
+body.et-shell[data-et-screen='personas'] #PersonaManagement::after,
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block::after {
+    display: block;
+    font-size: var(--et-type-sm);
+    color: var(--et-parchment-muted);
+    margin: 0 0 1rem;
+    order: -1;
+}
+
+body.et-shell[data-et-screen='characters'] #right-nav-panel::before { content: 'Characters'; }
+body.et-shell[data-et-screen='characters'] #right-nav-panel::after { content: 'Create, import, or open a cast member.'; }
+body.et-shell[data-et-screen='world'] #WorldInfo::before { content: 'World'; }
+body.et-shell[data-et-screen='world'] #WorldInfo::after { content: 'Lore books and entries for the stage.'; }
+body.et-shell[data-et-screen='connect'] #rm_api_block::before { content: 'Connect'; }
+body.et-shell[data-et-screen='connect'] #rm_api_block::after { content: 'Choose a provider, pick a model, then confirm status.'; }
+body.et-shell[data-et-screen='personas'] #PersonaManagement::before { content: 'Personas'; }
+body.et-shell[data-et-screen='personas'] #PersonaManagement::after { content: 'Who you are at the table.'; }
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block::before { content: 'Extensions'; }
+body.et-shell[data-et-screen='extensions'] #rm_extensions_block::after { content: 'Installed modules and their options.'; }
+
+/* Drop duplicate in-panel titles when destination chrome provides them */
+body.et-shell[data-et-screen='extensions'] .extensions_block > .alignitemscenter > h3 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+body.et-shell[data-et-screen='characters'] #right-nav-panel .right_menu_button,
+body.et-shell[data-et-screen='characters'] #rm_button_create,
+body.et-shell[data-et-screen='characters'] #rm_button_group_chats,
+body.et-shell[data-et-screen='characters'] #character_import_button,
+body.et-shell[data-et-screen='characters'] #rm_button_replace_avatar {
+    border-radius: var(--et-radius-sm) !important;
+}
+
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .character_select,
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .group_select,
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .bogus_folder_select {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+    background: rgba(28, 24, 20, 0.75) !important;
+    padding: 0.55rem !important;
+    transition: border-color var(--et-motion) ease, background var(--et-motion) ease, transform var(--et-motion) ease;
+}
+
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .character_select:hover,
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .group_select:hover,
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .bogus_folder_select:hover {
+    border-color: var(--et-edge-strong) !important;
+    background: rgba(196, 163, 90, 0.12) !important;
+    transform: translateY(-2px);
+}
+
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .ch_name,
+body.et-shell[data-et-screen='characters'] #rm_print_characters_block .group_name {
+    font-family: var(--et-font-display);
+    font-size: 1rem;
+    color: var(--et-parchment);
+}
+
+body.et-shell[data-et-screen='world'] #WorldInfo #world_popup > .flex-container.alignitemscenter:first-of-type {
+    border-radius: var(--et-radius) !important;
+    border-color: var(--et-edge) !important;
+    background: rgba(28, 24, 20, 0.9) !important;
+    padding: 0.75rem 0.9rem !important;
+}
+
+body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius-sm) !important;
+    background: rgba(18, 16, 14, 0.65) !important;
+    margin-bottom: 0.45rem !important;
+}
+
+body.et-shell[data-et-screen='connect'] #rm_api_block .menu_button,
+body.et-shell[data-et-screen='connect'] #api_button,
+body.et-shell[data-et-screen='connect'] #api_button_openai,
+body.et-shell[data-et-screen='connect'] #api_button_textgenerationwebui {
+    border-radius: var(--et-radius) !important;
+}
+
+body.et-shell[data-et-screen='connect'] #rm_api_block h3,
+body.et-shell[data-et-screen='connect'] #rm_api_block h4,
+body.et-shell[data-et-screen='characters'] #right-nav-panel h3,
+body.et-shell[data-et-screen='world'] #WorldInfo h3,
+body.et-shell[data-et-screen='settings'] h3,
+body.et-shell[data-et-screen='settings'] h4 {
+    font-family: var(--et-font-display);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--et-brass-soft);
+}
+
+body.et-shell[data-et-screen='settings'] .inline-drawer,
+body.et-shell[data-et-screen='settings'] .range-block,
+body.et-shell[data-et-screen='settings'] .flex-container.flexFlowColumn {
+    border-radius: var(--et-radius);
+}
+
+body.et-shell[data-et-screen='settings'] .inline-drawer {
+    border: 1px solid rgba(196, 163, 90, 0.16);
+    background: rgba(28, 24, 20, 0.45);
+    padding: 0.35rem 0.55rem;
+    margin-bottom: 0.55rem;
+}
+
+#et-settings-tabs {
+    background: rgba(12, 10, 8, 0.94) !important;
+    border-bottom-color: var(--et-edge) !important;
+}
+
+.et-settings-tab.is-active {
+    border-radius: var(--et-radius-sm);
+}
+
+/* ========== Scoped screens: Journal / Memory / Timeline ========== */
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel,
+body.et-shell[data-et-screen='memory'] #et-memory-screen,
+body.et-shell[data-et-screen='timeline'] #et-timeline-screen {
+    background:
+        linear-gradient(180deg, rgba(22, 18, 14, 0.98), rgba(12, 10, 8, 0.96)),
+        var(--et-ink-deep) !important;
+    border-top: 1px solid var(--et-edge) !important;
+    animation: et-stage-fade var(--et-motion-slow) ease-out;
+}
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-header,
+body.et-shell[data-et-screen='memory'] .et-memory-header,
+body.et-shell[data-et-screen='timeline'] .et-timeline-header,
+body.et-shell[data-et-screen='memory'] #et-memory-screen h2,
+body.et-shell[data-et-screen='timeline'] #et-timeline-screen h2 {
+    font-family: var(--et-font-display) !important;
+    font-size: var(--et-type-xl) !important;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--et-brass-soft) !important;
+}
+
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-subtitle,
+body.et-shell[data-et-screen='memory'] .et-memory-lede,
+body.et-shell[data-et-screen='timeline'] .et-timeline-lede {
+    color: var(--et-parchment-muted);
+    font-size: var(--et-type-sm);
+    max-width: 36rem;
+}
+
+/* ========== Chats library (destination — not active Chat) ========== */
+
+body.et-shell[data-et-screen='chats'] #et-chats-screen {
+    gap: 1rem !important;
+}
+
+body.et-shell #et-chats-screen .et-chats-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    width: 100%;
+}
+
+body.et-shell #et-chats-screen .et-chats-title {
+    margin: 0;
+    font-family: var(--et-font-ui);
+    font-size: var(--et-type-xl);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--et-parchment);
+    line-height: 1.2;
+}
+
+body.et-shell #et-chats-screen .et-chats-subtitle {
+    margin: 0 0 0.65rem;
+    font-size: var(--et-type-sm);
+    color: var(--et-parchment-muted);
+}
+
+body.et-shell #et-chats-screen .et-chats-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 0.35rem;
+}
+
+body.et-shell #et-chats-screen .et-chats-temp {
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+    background: rgba(28, 24, 20, 0.75) !important;
+    padding: 0.55rem 0.9rem !important;
+}
+
+body.et-shell #et-chats-screen .et-chats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    width: 100%;
+}
+
+body.et-shell #et-chats-screen .et-chats-empty {
+    color: var(--et-parchment-muted);
+    font-size: var(--et-type-sm);
+    padding: 1rem 0.25rem;
+}
+
+body.et-shell #et-chats-screen .et-chats-row {
+    appearance: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border: 1px solid var(--et-edge) !important;
+    border-radius: var(--et-radius) !important;
+    background: rgba(28, 24, 20, 0.75) !important;
+    padding: 0.7rem 0.85rem !important;
+    color: var(--et-parchment);
+    font: inherit;
+    transition: border-color var(--et-motion) ease, background var(--et-motion) ease, transform var(--et-motion) ease;
+    box-sizing: border-box;
+}
+
+body.et-shell #et-chats-screen .et-chats-row:hover,
+body.et-shell #et-chats-screen .et-chats-row.is-active {
+    border-color: var(--et-edge-strong) !important;
+    background: rgba(196, 163, 90, 0.12) !important;
+}
+
+body.et-shell #et-chats-screen .et-chats-row:hover {
+    transform: translateY(-2px);
+}
+
+body.et-shell #et-chats-screen .et-chats-avatar {
+    flex: 0 0 3rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--et-edge);
+}
+
+body.et-shell #et-chats-screen .et-chats-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+body.et-shell #et-chats-screen .et-chats-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+body.et-shell #et-chats-screen .et-chats-name {
+    font-family: var(--et-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--et-parchment);
+}
+
+body.et-shell #et-chats-screen .et-chats-preview {
+    color: var(--et-parchment-muted);
+    font-size: var(--et-type-sm);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+body.et-shell #et-chats-screen .et-chats-meta {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    color: var(--et-parchment-dim);
+    font-size: var(--et-type-xs);
+}
+
+/* ========== Mobile ========== */
+
+@media (max-width: 720px) {
+    body.et-shell[data-et-screen='chat'] #chat {
+        padding: 0.55rem 0.65rem 1rem !important;
+    }
+
+    body.et-shell[data-et-screen='chat'] #form_sheld {
+        padding: 0 0.55rem max(0.65rem, env(safe-area-inset-bottom)) !important;
+    }
+
+    body.et-shell #chat .mes {
+        gap: 0.5rem;
+        padding: 0.7rem 0.75rem !important;
+        margin-bottom: 0.85rem !important;
+    }
+
+    body.et-shell #chat .mes .mesAvatarWrapper .avatar {
+        width: 2.45rem !important;
+        height: 2.45rem !important;
+    }
+
+    body.et-shell #chat .mes .name_text {
+        font-size: 1.15rem;
+    }
+
+    body.et-shell #chat .mes .mes_text {
+        font-size: var(--et-type-base);
+        line-height: 1.55;
+    }
+
+    body.et-shell #chat .mes .mes_buttons {
+        opacity: 0.7;
+    }
+
+    body.et-shell #send_form {
+        border-radius: var(--et-radius) !important;
+        padding: 0.5rem 0.55rem !important;
+    }
+
+    body.et-shell #send_but {
+        width: 2.35rem !important;
+        height: 2.35rem !important;
+        min-width: 2.35rem !important;
+    }
+
+    body.et-shell #chat .welcomePanel {
+        margin: 0.75rem auto 1.25rem !important;
+        padding: 1.35rem 1rem 1.1rem !important;
+    }
+
+    body.et-shell #chat .welcomePanel .welcomeBrandTitle {
+        font-size: clamp(1.75rem, 8vw, 2.25rem);
+    }
+
+    body.et-shell[data-et-screen='characters'] #rm_print_characters_block .character_select,
+    body.et-shell[data-et-screen='characters'] #rm_print_characters_block .group_select {
+        padding: 0.45rem !important;
+    }
+
+    body.et-shell[data-et-screen='connect'] #rm_api_block,
+    body.et-shell[data-et-screen='characters'] #right-nav-panel,
+    body.et-shell[data-et-screen='world'] #WorldInfo,
+    body.et-shell[data-et-screen='personas'] #PersonaManagement,
+    body.et-shell[data-et-screen='extensions'] #rm_extensions_block,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='general'] #user-settings-block,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
+    body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
+        padding: 1rem clamp(1.25rem, 6vw, 2rem) 1.75rem !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.et-shell #chat .mes,
+    body.et-shell #send_form:focus-within,
+    body.et-shell .drawer-content.openDrawer {
+        animation: none !important;
+    }
+}

@@ -18,14 +18,15 @@ body.et-shell[data-et-screen='memory'] #et-memory-screen {
     z-index: 3500 !important;
     margin: 0 !important;
     border: none !important;
+    border-top: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
     border-radius: 0 !important;
-    padding: 1.25rem clamp(1.5rem, 6vw, 5rem) 2rem !important;
+    padding: 1.5rem clamp(1.25rem, 5vw, 3.5rem) 2.5rem !important;
     overflow-x: hidden;
     overflow-y: auto;
     background:
-        linear-gradient(180deg, rgba(28, 24, 20, 0.97), rgba(18, 16, 14, 0.94)),
-        var(--SmartThemeBlurTintColor, #1c1814);
-    animation: et-screen-in 180ms ease-out;
+        linear-gradient(180deg, rgba(22, 18, 14, 0.98), rgba(12, 10, 8, 0.96)),
+        var(--et-ink-deep, #0c0a08);
+    animation: et-stage-fade 380ms ease-out;
     pointer-events: auto;
 }
 
@@ -46,17 +47,18 @@ body.et-shell[data-et-screen='memory'] #et-memory-screen {
 
 .et-memory-title {
     margin: 0;
-    font-size: 1.75rem;
-    font-weight: 650;
-    color: var(--et-parchment, #e8dcc8);
-    letter-spacing: 0.01em;
+    font-family: var(--et-font-ui, 'Noto Sans', sans-serif);
+    font-size: var(--et-type-xl, 1.45rem);
+    font-weight: 700;
+    color: var(--et-parchment, #e8dfd0);
+    letter-spacing: 0.02em;
 }
 
 .et-memory-sub {
     margin: 0.35rem 0 0;
     max-width: 36rem;
-    color: rgba(232, 220, 200, 0.72);
-    font-size: 0.95rem;
+    color: var(--et-parchment-muted, #b9ae9c);
+    font-size: var(--et-type-sm, 0.85rem);
     line-height: 1.45;
 }
 
@@ -110,8 +112,9 @@ body.et-shell[data-et-screen='memory'] #et-memory-screen {
 
 .et-memory-card {
     padding: 0.9rem 1rem;
-    border: 1px solid rgba(196, 163, 90, 0.28);
-    background: rgba(255, 248, 235, 0.04);
+    border: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28));
+    border-radius: var(--et-radius, 0.55rem);
+    background: rgba(28, 24, 20, 0.55);
 }
 
 .et-memory-card.is-pinned {

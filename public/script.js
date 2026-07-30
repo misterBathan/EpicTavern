@@ -801,6 +801,7 @@ async function firstLoadInit() {
     await fixViewport();
     try {
         await initRpgCompanion();
+        await import('./scripts/et-journal-hud.js');
     } catch (error) {
         console.error('[EpicTavern] RPG init failed:', error);
     }
@@ -1512,6 +1513,9 @@ export async function showMoreMessages(messagesToLoad = null) {
 }
 
 export async function printMessages() {
+    // Welcome panel must not linger — it breaks EpicTavern chat chrome (:has(.welcomePanel))
+    chatElement.find('.welcomePanel').remove();
+
     let startIndex = 0;
     let count = power_user.chat_truncation || Number.MAX_SAFE_INTEGER;
 

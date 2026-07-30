@@ -1,35 +1,16 @@
 <div class="welcomePanel">
     <div class="welcomeHeaderTitle">
-        <img src="img/logo.png" alt="SillyTavern Logo" data-i18n="[alt]SillyTavern Logo" class="welcomeHeaderLogo">
+        <img src="img/logo.png" alt="EpicTavern" class="welcomeHeaderLogo">
+        <h1 class="welcomeBrandTitle">EpicTavern</h1>
+        <p class="welcomeTagline">A candlelit stage for stories that linger.</p>
         <span class="welcomeHeaderVersionDisplay">{{version}}</span>
-        <div class="mes_button showRecentChats" title="Show recent chats" data-i18n="[title]Show recent chats">
-            <i class="fa-solid fa-circle-chevron-down fa-fw fa-lg"></i>
-        </div>
-        <div class="mes_button recentChatsSettings" title="Recent chats settings" data-i18n="[title]Recent chats settings">
-            <i class="fa-solid fa-gear fa-fw fa-lg"></i>
-        </div>
-        <div class="mes_button hideRecentChats" title="Hide recent chats" data-i18n="[title]Hide recent chats">
-            <i class="fa-solid fa-circle-xmark fa-fw fa-lg"></i>
-        </div>
     </div>
     <div class="welcomeHeader">
-        <div class="recentChatsTitle" data-i18n="Recent Chats">
-            Recent Chats
-        </div>
         <div class="welcomeShortcuts">
-            <a class="menu_button menu_button_icon" target="_blank" href="https://docs.sillytavern.app/">
-                <i class="fa-solid fa-question-circle"></i>
-                <span data-i18n="Docs">Docs</span>
-            </a>
-            <a class="menu_button menu_button_icon" target="_blank" href="https://github.com/SillyTavern/SillyTavern">
-                <i class="fa-brands fa-github"></i>
-                <span data-i18n="GitHub">GitHub</span>
-            </a>
-            <a class="menu_button menu_button_icon" target="_blank" href="https://discord.gg/sillytavern">
-                <i class="fa-brands fa-discord"></i>
-                <span data-i18n="Discord">Discord</span>
-            </a>
-            <span class="welcomeShortcutsSeparator">&vert;</span>
+            <button type="button" class="welcomePrimaryCta menu_button menu_button_icon" data-et-welcome-nav="characters">
+                <i class="fa-solid fa-users"></i>
+                <span>Enter Characters</span>
+            </button>
             <button class="openTemporaryChat menu_button menu_button_icon">
                 <i class="fa-solid fa-comment-dots"></i>
                 <span data-i18n="Temporary Chat">Temporary Chat</span>
@@ -37,6 +18,7 @@
         </div>
     </div>
     <div class="welcomeRecent">
+        <div class="recentChatsTitle" data-i18n="Recent Chats">Recent Chats</div>
         <div class="recentChatList">
         {{#if empty}}
             <div class="noRecentChat">

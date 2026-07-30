@@ -4,14 +4,25 @@
  */
 
 import { eventSource, event_types } from './events.js';
+import { ensureChatsScreen, initEtChatsScreen, refreshChatsScreen } from './et-chats-screen.js';
 
-/** @typedef {'chat' | 'connect' | 'characters' | 'world' | 'personas' | 'timeline' | 'journal' | 'memory' | 'settings'} EtScreen */
-/** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds' | 'extensions'} EtSettingsSection */
+/** @typedef {'home' | 'chats' | 'chat' | 'connect' | 'characters' | 'world' | 'personas' | 'extensions' | 'timeline' | 'journal' | 'memory' | 'settings'} EtScreen */
+/** @typedef {'general' | 'ai' | 'formatting' | 'backgrounds'} EtSettingsSection */
 
 /**
  * @type {Record<EtScreen, { title: string, panelId: string | null, drawerId: string | null }>}
  */
 export const ET_SCREENS = {
+    home: {
+        title: 'Home',
+        panelId: null,
+        drawerId: null,
+    },
+    chats: {
+        title: 'Chats',
+        panelId: 'et-chats-screen',
+        drawerId: null,
+    },
     chat: {
         title: 'Chat',
         panelId: null,
@@ -36,6 +47,11 @@ export const ET_SCREENS = {
         title: 'Personas',
         panelId: 'PersonaManagement',
         drawerId: 'persona-management-button',
+    },
+    extensions: {
+        title: 'Extensions',
+        panelId: 'rm_extensions_block',
+        drawerId: 'extensions-settings-button',
     },
     timeline: {
         title: 'Timeline',
@@ -84,11 +100,6 @@ export const ET_SETTINGS_SECTIONS = {
         panelId: 'Backgrounds',
         drawerId: 'backgrounds-button',
     },
-    extensions: {
-        label: 'Extensions',
-        panelId: 'rm_extensions_block',
-        drawerId: 'extensions-settings-button',
-    },
 };
 
 /** All panel IDs owned by the router (screens + settings sections). */
@@ -104,7 +115,7 @@ const SCREEN_DRAWER_IDS = new Set([
 ]);
 
 /** @type {EtScreen} */
-let currentScreen = 'chat';
+let currentScreen = 'home';
 /** @type {EtSettingsSection} */
 let currentSettingsSection = 'general';
 
@@ -115,17 +126,25 @@ let currentSettingsSection = 'general';
 export function parseRouteFromHash(hash = window.location.hash) {
     const raw = String(hash || '').replace(/^#\/?/, '');
     const parts = raw.split(/[/?#]/).filter(Boolean).map(p => p.toLowerCase());
-    const screenPart = parts[0] || 'chat';
+    const screenPart = parts[0] || 'home';
     /** @type {EtScreen} */
-    let screen = 'chat';
+    let screen = 'home';
     if (Object.prototype.hasOwnProperty.call(ET_SCREENS, screenPart)) {
         screen = /** @type {EtScreen} */ (screenPart);
+    } else if (screenPart === 'extension') {
+        screen = 'extensions';
+    }
+    // Legacy: #/chat without an active conversation meant the library
+    if (screenPart === 'chat' && parts[1] === 'library') {
+        screen = 'chats';
     }
 
     /** @type {EtSettingsSection} */
     let settingsSection = 'general';
     if (screen === 'settings' && parts[1] && Object.prototype.hasOwnProperty.call(ET_SETTINGS_SECTIONS, parts[1])) {
         settingsSection = /** @type {EtSettingsSection} */ (parts[1]);
+    } else if (screen === 'settings' && parts[1] === 'extensions') {
+        screen = 'extensions';
     }
 
     return { screen, settingsSection };
@@ -239,7 +258,7 @@ function ensureSettingsTabs() {
  */
 export function navigate(screen, { updateHash = true, settingsSection } = {}) {
     if (!Object.prototype.hasOwnProperty.call(ET_SCREENS, screen)) {
-        screen = 'chat';
+        screen = 'home';
     }
 
     if (screen === 'settings') {
@@ -247,6 +266,11 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
             currentSettingsSection = settingsSection;
         }
         if (!Object.prototype.hasOwnProperty.call(ET_SETTINGS_SECTIONS, currentSettingsSection)) {
+            currentSettingsSection = 'general';
+        }
+        // Extensions moved to AppNav — bounce legacy hash
+        if (settingsSection === 'extensions' || /** @type {string} */ (currentSettingsSection) === 'extensions') {
+            screen = 'extensions';
             currentSettingsSection = 'general';
         }
     }
@@ -265,8 +289,12 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
         delete document.body.dataset.etSettingsSection;
     }
 
-    if (screen !== 'chat') {
+    if (screen !== 'chat' && screen !== 'home' && screen !== 'chats') {
         closeLegacyDrawers();
+    }
+
+    if (screen === 'chats') {
+        ensureChatsScreen();
     }
 
     // Primary screen panels (excluding settings sections handled below)
@@ -283,6 +311,9 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
         if (open && meta.panelId === 'right-nav-panel') {
             $('#rm_print_characters_block').trigger('scroll');
         }
+        if (open && meta.panelId === 'et-chats-screen') {
+            void refreshChatsScreen();
+        }
     }
 
     // Settings hub sections
@@ -293,12 +324,15 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
 
     $('#et-app-nav .et-nav-item').each(function () {
         const itemScreen = this.getAttribute('data-et-screen');
-        // Journal / Timeline / Memory are chat-scoped destinations — keep Chat highlighted
-        const chatScoped = screen === 'journal' || screen === 'timeline' || screen === 'memory';
-        const active = itemScreen === screen || (itemScreen === 'chat' && chatScoped);
+        // Journal / Timeline / Memory are chat-scoped destinations — keep Chats highlighted
+        const chatScoped = screen === 'journal' || screen === 'timeline' || screen === 'memory' || screen === 'chat';
+        const active = itemScreen === screen
+            || (itemScreen === 'chats' && chatScoped);
         this.classList.toggle('is-active', active);
         this.setAttribute('aria-current', active ? 'page' : 'false');
     });
+
+    $('#et-app-nav .et-nav-brand').toggleClass('is-active', screen === 'home');
 
     $('#et-settings-tabs .et-settings-tab').each(function () {
         const section = this.getAttribute('data-et-settings-section');
@@ -379,14 +413,14 @@ export function initAppNav() {
         nav.id = 'et-app-nav';
         nav.setAttribute('aria-label', 'EpicTavern');
         nav.innerHTML = `
-            <div class="et-nav-brand" data-et-screen="chat" title="EpicTavern">
+            <div class="et-nav-brand" data-et-screen="home" title="EpicTavern Home">
                 <span class="et-nav-brand-mark" aria-hidden="true"></span>
                 <span class="et-nav-brand-text">EpicTavern</span>
             </div>
             <div class="et-nav-items" role="list">
-                <button type="button" class="et-nav-item" data-et-screen="chat" role="listitem">
+                <button type="button" class="et-nav-item" data-et-screen="chats" role="listitem">
                     <i class="fa-solid fa-comments" aria-hidden="true"></i>
-                    <span>Chat</span>
+                    <span>Chats</span>
                 </button>
                 <button type="button" class="et-nav-item" data-et-screen="characters" role="listitem">
                     <i class="fa-solid fa-address-card" aria-hidden="true"></i>
@@ -404,6 +438,10 @@ export function initAppNav() {
                     <i class="fa-solid fa-plug" aria-hidden="true"></i>
                     <span>Connect</span>
                 </button>
+                <button type="button" class="et-nav-item" data-et-screen="extensions" role="listitem">
+                    <i class="fa-solid fa-cubes" aria-hidden="true"></i>
+                    <span>Extensions</span>
+                </button>
                 <button type="button" class="et-nav-item" data-et-screen="settings" role="listitem">
                     <i class="fa-solid fa-gear" aria-hidden="true"></i>
                     <span>Settings</span>
@@ -411,9 +449,6 @@ export function initAppNav() {
             </div>
             <div class="et-nav-meta">
                 <small id="version_display" class="et-nav-version" title="EpicTavern version"></small>
-                <div class="et-nav-phase" title="Candlelit Tavern visual pass">
-                    <span class="et-nav-phase-pill">Phase 5</span>
-                </div>
             </div>
         `;
         document.body.prepend(nav);
@@ -422,7 +457,24 @@ export function initAppNav() {
     // Remove chat-scoped destinations from AppNav (belong in Chat Top Bar)
     document.querySelectorAll('#et-app-nav [data-et-screen="timeline"], #et-app-nav [data-et-screen="journal"], #et-app-nav [data-et-screen="memory"]').forEach((el) => el.remove());
 
-    // Upgrade older AppNav shells that predate Personas
+    // Logo always goes Home
+    const brand = document.querySelector('#et-app-nav .et-nav-brand');
+    if (brand) {
+        brand.setAttribute('data-et-screen', 'home');
+        brand.setAttribute('title', 'EpicTavern Home');
+    }
+
+    // Upgrade Chat → Chats library nav item
+    const legacyChatBtn = document.querySelector('#et-app-nav .et-nav-items [data-et-screen="chat"]');
+    if (legacyChatBtn) {
+        legacyChatBtn.setAttribute('data-et-screen', 'chats');
+        const label = legacyChatBtn.querySelector('span');
+        if (label) {
+            label.textContent = 'Chats';
+        }
+    }
+
+    // Upgrade older AppNav shells that predate Personas / Extensions / Home
     if (document.getElementById('et-app-nav') && !document.querySelector('#et-app-nav [data-et-screen="personas"]')) {
         const worldBtn = document.querySelector('#et-app-nav [data-et-screen="world"]');
         const personasBtn = document.createElement('button');
@@ -436,8 +488,22 @@ export function initAppNav() {
         }
     }
 
-    // Drop Timeline / Personas from Settings hub (moved out)
-    document.querySelectorAll('#et-settings-tabs [data-et-settings-section="timeline"], #et-settings-tabs [data-et-settings-section="personas"]').forEach((el) => el.remove());
+    if (document.getElementById('et-app-nav') && !document.querySelector('#et-app-nav .et-nav-items [data-et-screen="extensions"]')) {
+        const connectBtn = document.querySelector('#et-app-nav [data-et-screen="connect"]');
+        const extBtn = document.createElement('button');
+        extBtn.type = 'button';
+        extBtn.className = 'et-nav-item';
+        extBtn.setAttribute('data-et-screen', 'extensions');
+        extBtn.setAttribute('role', 'listitem');
+        extBtn.innerHTML = '<i class="fa-solid fa-cubes" aria-hidden="true"></i><span>Extensions</span>';
+        if (connectBtn?.parentElement) {
+            connectBtn.insertAdjacentElement('afterend', extBtn);
+        }
+    }
+
+    // Drop Timeline / Personas / Extensions from Settings hub (moved out)
+    document.querySelectorAll('#et-settings-tabs [data-et-settings-section="timeline"], #et-settings-tabs [data-et-settings-section="personas"], #et-settings-tabs [data-et-settings-section="extensions"]').forEach((el) => el.remove());
+    document.querySelectorAll('#et-app-nav .et-nav-phase').forEach((el) => el.remove());
 
     // Rebuild settings tabs if they still include removed sections
     const settingsTabs = document.getElementById('et-settings-tabs');
@@ -479,9 +545,15 @@ export function initAppNav() {
         });
     });
 
-    eventSource.on(event_types.CHAT_CHANGED, () => {
-        if (currentScreen === 'characters') {
-            navigate('chat');
+    eventSource.on(event_types.CHAT_CHANGED, (chatId) => {
+        if (chatId) {
+            if (currentScreen === 'characters' || currentScreen === 'home' || currentScreen === 'chats') {
+                navigate('chat');
+            }
+            return;
+        }
+        if (currentScreen === 'chat') {
+            navigate('chats');
         }
     });
 
@@ -489,9 +561,54 @@ export function initAppNav() {
         navigate('characters');
     });
 
+    initEtChatsScreen();
+    reorganizeGeneralSettings();
+
     const route = parseRouteFromHash();
-    navigate(route.screen, {
+    // Default AppNav Chat target is the library; only stay on active Chat if already in one
+    let initialScreen = route.screen;
+    if (initialScreen === 'chat') {
+        // Keep chat if hash says chat; otherwise library is #/chats
+        initialScreen = 'chat';
+    }
+    navigate(initialScreen, {
         updateHash: true,
         settingsSection: route.settingsSection,
     });
+}
+
+/**
+ * Restack General settings into accordion cards (once).
+ */
+function reorganizeGeneralSettings() {
+    const content = document.getElementById('user-settings-block-content');
+    if (!content || content.dataset.etSettingsReorg === '1') {
+        return;
+    }
+    content.dataset.etSettingsReorg = '1';
+
+    /** @type {{ selector: string, title: string, open?: boolean }[]} */
+    const cards = [
+        { selector: '[name="UserSettingsFirstColumn"]', title: 'Appearance', open: true },
+        { selector: '[name="UserSettingsSecondColumn"]', title: 'Characters & tools', open: false },
+        { selector: '[name="UserSettingsThirdColumn"]', title: 'Chat & messages', open: false },
+    ];
+
+    for (const card of cards) {
+        const col = content.querySelector(card.selector);
+        if (!col || col.closest('details.et-settings-card')) {
+            continue;
+        }
+        const details = document.createElement('details');
+        details.className = 'et-settings-card';
+        details.open = Boolean(card.open);
+        const summary = document.createElement('summary');
+        summary.textContent = card.title;
+        const body = document.createElement('div');
+        body.className = 'et-settings-card-body';
+        col.parentElement?.insertBefore(details, col);
+        details.appendChild(summary);
+        details.appendChild(body);
+        body.appendChild(col);
+    }
 }
