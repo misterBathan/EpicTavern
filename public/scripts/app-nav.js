@@ -282,6 +282,66 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
     document.body.classList.add('et-shell');
     document.body.dataset.etScreen = screen;
 
+    // Never let chat chrome lose AppNav / Chat Top Bar
+    const appNav = document.getElementById('et-app-nav');
+    if (appNav) {
+        appNav.style.setProperty('display', 'flex', 'important');
+        appNav.style.setProperty('visibility', 'visible', 'important');
+        appNav.style.setProperty('opacity', '1', 'important');
+        appNav.style.setProperty('z-index', '2147483000', 'important');
+        appNav.style.setProperty('position', 'fixed', 'important');
+        appNav.style.setProperty('top', '0', 'important');
+        // Keep as first child of body so nothing can bury it
+        if (document.body.firstElementChild !== appNav) {
+            document.body.prepend(appNav);
+        }
+    }
+    const topBar = document.getElementById('etChatTopBar');
+    if (topBar) {
+        if (screen === 'chat') {
+            topBar.style.setProperty('display', 'flex', 'important');
+            topBar.style.setProperty('visibility', 'visible', 'important');
+            topBar.style.setProperty('opacity', '1', 'important');
+            topBar.style.setProperty('z-index', '2147482900', 'important');
+            topBar.style.setProperty('position', 'fixed', 'important');
+        } else {
+            // Clear inline so screen CSS can hide it again
+            topBar.style.removeProperty('display');
+            topBar.style.removeProperty('visibility');
+            topBar.style.removeProperty('opacity');
+            topBar.style.removeProperty('z-index');
+            topBar.style.removeProperty('position');
+        }
+    }
+
+    if (screen === 'chat') {
+        // Clear MovingUI inline geometry so sheld fills under AppNav → bottom (no phantom gap)
+        const sheld = document.getElementById('sheld');
+        if (sheld) {
+            ['top', 'left', 'right', 'bottom', 'height', 'width', 'margin', 'max-height', 'min-height'].forEach((prop) => {
+                sheld.style.removeProperty(prop);
+            });
+        }
+        const formSheld = document.getElementById('form_sheld');
+        if (formSheld) {
+            ['height', 'min-height', 'margin', 'top', 'bottom'].forEach((prop) => {
+                formSheld.style.removeProperty(prop);
+            });
+        }
+        // Drop persisted MovingUI geometry for sheld — it recreates the bottom dead band
+        import('./power-user.js').then(({ power_user, saveSettingsDebounced }) => {
+            if (power_user?.movingUIState?.sheld) {
+                delete power_user.movingUIState.sheld;
+                saveSettingsDebounced?.();
+            }
+        }).catch(() => { /* power-user may not be ready yet */ });
+        import('./et-force-chrome.js').then(({ forceEtChrome }) => {
+            forceEtChrome();
+            requestAnimationFrame(() => forceEtChrome());
+            setTimeout(() => forceEtChrome(), 100);
+        }).catch(() => { /* ignore */ });
+    }
+
     if (screen === 'settings') {
         document.body.dataset.etSettingsSection = currentSettingsSection;
         ensureSettingsTabs();
@@ -452,6 +512,12 @@ export function initAppNav() {
             </div>
         `;
         document.body.prepend(nav);
+    } else {
+        // Nav is baked into index.html — keep it first and forced visible
+        const existing = document.getElementById('et-app-nav');
+        if (existing && document.body.firstElementChild !== existing) {
+            document.body.prepend(existing);
+        }
     }
 
     // Remove chat-scoped destinations from AppNav (belong in Chat Top Bar)

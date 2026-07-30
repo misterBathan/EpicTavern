@@ -16,6 +16,32 @@
         body {
             background-color: #0c0a08;
         }
+        /* CRITICAL: site header must always paint above chat/RPG — never hide */
+        #et-app-nav {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 3.25rem !important;
+            min-height: 3.25rem !important;
+            z-index: 2147483000 !important;
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            padding: 0 0.85rem !important;
+            box-sizing: border-box !important;
+            background: linear-gradient(180deg, rgba(28, 24, 20, 0.98), rgba(18, 16, 14, 0.96)) !important;
+            border-bottom: 1px solid rgba(196, 163, 90, 0.28) !important;
+            color: #e8dfd0 !important;
+            font-family: 'Noto Sans', sans-serif !important;
+            transform: none !important;
+            clip: auto !important;
+            clip-path: none !important;
+            overflow: visible !important;
+        }
     </style>
     <link rel="preload" as="style" href="style.css">
     <link rel="manifest" crossorigin="use-credentials" href="manifest.json">
@@ -57,6 +83,45 @@
 </head>
 
 <body class="no-blur et-shell" data-et-screen="chat">
+    <nav id="et-app-nav" aria-label="EpicTavern">
+        <div class="et-nav-brand" data-et-screen="home" title="EpicTavern Home">
+            <span class="et-nav-brand-mark" aria-hidden="true"></span>
+            <span class="et-nav-brand-text">EpicTavern</span>
+        </div>
+        <div class="et-nav-items" role="list">
+            <button type="button" class="et-nav-item" data-et-screen="chats" role="listitem">
+                <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                <span>Chats</span>
+            </button>
+            <button type="button" class="et-nav-item" data-et-screen="characters" role="listitem">
+                <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+                <span>Characters</span>
+            </button>
+            <button type="button" class="et-nav-item" data-et-screen="world" role="listitem">
+                <i class="fa-solid fa-book-atlas" aria-hidden="true"></i>
+                <span>World</span>
+            </button>
+            <button type="button" class="et-nav-item" data-et-screen="personas" role="listitem">
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
+                <span>Personas</span>
+            </button>
+            <button type="button" class="et-nav-item" data-et-screen="connect" role="listitem">
+                <i class="fa-solid fa-plug" aria-hidden="true"></i>
+                <span>Connect</span>
+            </button>
+            <button type="button" class="et-nav-item" data-et-screen="extensions" role="listitem">
+                <i class="fa-solid fa-cubes" aria-hidden="true"></i>
+                <span>Extensions</span>
+            </button>
+            <button type="button" class="et-nav-item" data-et-screen="settings" role="listitem">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+        <div class="et-nav-meta">
+            <small id="version_display" class="et-nav-version" title="EpicTavern version"></small>
+        </div>
+    </nav>
     <div id="preloader"></div>
     <div id="bg1"></div>
     <div id="character_context_menu" class="hidden">
@@ -5802,8 +5867,8 @@
                         <div id="accuweather_container" class="extension_container"></div>
                         <div id="dice_container" class="extension_container"></div>
                     </div>
-                    <hr class="wide100p margin0">
-                    <div class="alignitemscenter flex-container justifyCenter wide100p" style="justify-content: space-between;">
+                    <hr class="wide100p margin0 et-extras-api-block">
+                    <div class="alignitemscenter flex-container justifyCenter wide100p et-extras-api-block" style="justify-content: space-between;">
                         <h4 class="margin0">
                             <span data-i18n="(DEPRECATED)">(DEPRECATED)</span>
                             <span data-i18n="Extras API:">Extras API:</span>
@@ -5816,7 +5881,7 @@
                             </label>
                         </div>
                     </div>
-                    <div class="alignitemsflexstart flex-container wide100p">
+                    <div class="alignitemsflexstart flex-container wide100p et-extras-api-block">
                         <input id="extensions_url" type="text" class="flex1 heightFitContent text_pole widthNatural" data-i18n="[placeholder]Extras API URL" placeholder="Extras API URL">
                         <input id="extensions_api_key" type="text" class="flex1 heightFitContent text_pole widthNatural" data-i18n="[placeholder]Extras API key (optional)" placeholder="Extras API key (optional)">
                         <div class="extensions_url_block">

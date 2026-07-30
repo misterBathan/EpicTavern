@@ -69,6 +69,23 @@ function getIcons() {
             onClick: () => navigate('memory'),
         },
         {
+            id: 'etChatTopBarRpgConfig',
+            icon: 'fa-fw fa-solid fa-sliders',
+            position: 'middle',
+            title: t`RPG tracker configuration`,
+            isTemporaryAllowed: true,
+            onClick: () => {
+                const btn = document.querySelector('#rpg-open-tracker-editor, #rpg-header-tracker-editor');
+                if (btn instanceof HTMLElement) {
+                    btn.click();
+                    return;
+                }
+                document.querySelector('#rpg-companion-panel .fa-gear')
+                    ?.closest('button, .rpg-btn-icon, .menu_button')
+                    ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            },
+        },
+        {
             id: 'etChatTopBarChatManager',
             icon: 'fa-fw fa-solid fa-address-book',
             position: 'right',

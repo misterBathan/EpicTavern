@@ -1838,6 +1838,10 @@ export function loadMovingUIState() {
         && power_user.movingUI === true) {
         console.debug('loading movingUI state');
         for (var elmntName of Object.keys(power_user.movingUIState)) {
+            // EpicTavern owns #sheld geometry on Chat — never re-apply MovingUI size (bottom gap)
+            if (elmntName === 'sheld' && document.body?.classList?.contains('et-shell')) {
+                continue;
+            }
             var elmntState = power_user.movingUIState[elmntName];
             try {
                 var elmnt = $('#' + $.escapeSelector(elmntName));

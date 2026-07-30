@@ -290,6 +290,7 @@ import { initChatTopBar } from './scripts/chat-top-bar/index.js';
 import { initTimelines } from './scripts/timelines/index.js';
 import { initMemory } from './scripts/memory/index.js';
 import { initEtSendFix } from './scripts/et-send-fix.js';
+import { initEtForceChrome } from './scripts/et-force-chrome.js';
 import { initAccessibility } from './scripts/a11y.js';
 import { applyStreamFadeIn } from './scripts/util/stream-fadein.js';
 import { initDomHandlers } from './scripts/dom-handlers.js';
@@ -824,6 +825,11 @@ async function firstLoadInit() {
         initEtSendFix();
     } catch (error) {
         console.error('[EpicTavern] Send fix init failed:', error);
+    }
+    try {
+        initEtForceChrome();
+    } catch (error) {
+        console.error('[EpicTavern] Force chrome init failed:', error);
     }
     await eventSource.emit(event_types.APP_READY);
 }
@@ -11117,6 +11123,11 @@ function initCharacterSearch() {
 // MARK: DOM Handlers Start
 jQuery(async function () {
     initAppNav();
+    try {
+        initEtForceChrome();
+    } catch (error) {
+        console.error('[EpicTavern] Force chrome early init failed:', error);
+    }
     if (displayVersion) {
         $('#version_display').text(displayVersion);
         $('#version_display_welcome').text(displayVersion);

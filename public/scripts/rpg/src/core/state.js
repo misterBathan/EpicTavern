@@ -151,11 +151,11 @@ export let extensionSettings = {
             statsDisplayMode: 'percentage',
             // Array of custom stats (allows add/remove/rename)
             customStats: [
-                { id: 'health', name: 'Health', enabled: true, persistInHistory: false, maxValue: 100 },
-                { id: 'satiety', name: 'Satiety', enabled: true, persistInHistory: false, maxValue: 100 },
-                { id: 'energy', name: 'Energy', enabled: true, persistInHistory: false, maxValue: 100 },
-                { id: 'hygiene', name: 'Hygiene', enabled: true, persistInHistory: false, maxValue: 100 },
-                { id: 'arousal', name: 'Arousal', enabled: true, persistInHistory: false, maxValue: 100 }
+                { id: 'health', name: 'Health', enabled: true, persistInHistory: false, maxValue: 100, colorHigh: '#ff6b6b', colorLow: '#a33a3a' },
+                { id: 'satiety', name: 'Satiety', enabled: true, persistInHistory: false, maxValue: 100, colorHigh: '#e8c45a', colorLow: '#9a7a30' },
+                { id: 'energy', name: 'Energy', enabled: true, persistInHistory: false, maxValue: 100, colorHigh: '#f0d070', colorLow: '#a8893a' },
+                { id: 'hygiene', name: 'Hygiene', enabled: true, persistInHistory: false, maxValue: 100, colorHigh: '#6ee8d8', colorLow: '#2a8a82' },
+                { id: 'arousal', name: 'Arousal', enabled: true, persistInHistory: false, maxValue: 100, colorHigh: '#ff7ab0', colorLow: '#a34570' }
             ],
             // RPG Attributes (customizable D&D-style attributes)
             showRPGAttributes: true,
@@ -237,10 +237,11 @@ export let extensionSettings = {
             },
             // Character stats toggle (optional feature)
             characterStats: {
-                enabled: false,
+                enabled: true,
                 customStats: [
-                    { id: 'health', name: 'Health', enabled: true },
-                    { id: 'arousal', name: 'Arousal', enabled: true }
+                    { id: 'health', name: 'Health', enabled: true, colorHigh: '#ff6b6b', colorLow: '#a33a3a' },
+                    { id: 'stamina', name: 'Stamina', enabled: true, colorHigh: '#f0d070', colorLow: '#a8893a' },
+                    { id: 'mana', name: 'Mana', enabled: true, colorHigh: '#6ec8ff', colorLow: '#2a6aaa' }
                 ]
             }
         }

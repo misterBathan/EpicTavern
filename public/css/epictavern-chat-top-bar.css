@@ -1,5 +1,6 @@
 /**
  * Chat top bar — scene tools under AppNav (active Chat screen only).
+ * Fixed under AppNav so sheld layout can never hide rename/delete/header tools.
  */
 
 @import url('../scripts/chat-top-bar/style.css');
@@ -14,55 +15,70 @@ body.et-shell[data-et-screen='chat'] #etChatTopBar {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: var(--et-scene-tools-height, 2.85rem) !important;
-    min-height: var(--et-scene-tools-height, 2.85rem) !important;
-    flex: 0 0 auto !important;
+    position: fixed !important;
+    /* Hardcoded under AppNav — never flush / never hide site header */
+    top: 3.25rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 2.85rem !important;
+    min-height: 2.85rem !important;
+    max-height: 2.85rem !important;
+    flex: none !important;
+    flex-shrink: 0 !important;
+    z-index: 2147482900 !important;
+    margin: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
 }
 
 body.et-shell[data-et-screen='chat'] #etChatTopBarSideBar {
-    top: var(--et-app-nav-height) !important;
-    height: calc(100dvh - var(--et-app-nav-height)) !important;
-    z-index: 1300;
+    top: 6.1rem !important;
+    height: calc(100dvh - 6.1rem) !important;
+    z-index: 99980;
 }
 
 #etChatTopBarTimeline,
 #etChatTopBarJournal,
-#etChatTopBarMemory {
+#etChatTopBarMemory,
+#etChatTopBarRpgConfig {
     margin-left: 0.15rem;
 }
 
 body.et-shell #etChatTopBar {
     border: none !important;
-    border-bottom: 1px solid var(--et-edge) !important;
+    border-bottom: 1px solid rgba(196, 163, 90, 0.12) !important;
     border-radius: 0 !important;
-    background:
-        linear-gradient(180deg, rgba(28, 24, 20, 0.94), rgba(18, 16, 14, 0.9)) !important;
-    color: var(--et-parchment) !important;
+    background: rgba(12, 10, 8, 0.42) !important;
+    color: var(--et-parchment-dim) !important;
     box-shadow: none !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 body.et-shell #etChatTopBar .right_menu_button {
-    color: var(--et-parchment-muted);
-    width: 2rem;
-    height: 2rem;
+    color: rgba(185, 174, 156, 0.55);
+    width: 1.75rem;
+    height: 1.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--et-radius-sm, 0.35rem);
     border: 1px solid transparent;
     background: transparent;
+    font-size: 0.82rem;
     transition:
         color var(--et-motion, 220ms) ease,
         border-color var(--et-motion, 220ms) ease,
-        background var(--et-motion, 220ms) ease;
+        background var(--et-motion, 220ms) ease,
+        opacity var(--et-motion, 220ms) ease;
 }
 
 body.et-shell #etChatTopBar .right_menu_button:hover {
     color: var(--et-brass-soft);
-    border-color: var(--et-edge);
-    background: rgba(196, 163, 90, 0.1);
+    border-color: rgba(196, 163, 90, 0.22);
+    background: rgba(196, 163, 90, 0.08);
 }
 
 body.et-shell #etChatTopBarConnectionProfiles {
@@ -70,6 +86,11 @@ body.et-shell #etChatTopBarConnectionProfiles {
     border-bottom: 1px solid var(--et-edge) !important;
     border-radius: 0 !important;
     background: rgba(18, 16, 14, 0.92) !important;
+    position: fixed !important;
+    top: calc(var(--et-app-nav-height) + var(--et-scene-tools-height, 2.85rem)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 99985 !important;
 }
 
 body.et-shell #etChatTopBarSideBar {
@@ -93,16 +114,21 @@ body.et-shell #etChatTopBarSideBar .sideBarItem.selected {
 }
 
 body.et-shell #etChatTopBarChatName {
-    font-family: var(--et-font-display, 'Noto Sans', sans-serif) !important;
-    color: var(--et-parchment) !important;
+    font-family: var(--et-font-ui, 'Noto Sans', sans-serif) !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em;
+    color: var(--et-parchment-muted) !important;
     border: none !important;
     background: transparent !important;
+    opacity: 0.85;
 }
 
 body.et-shell #etChatTopBarSearchInput,
 body.et-shell #etChatTopBarConnectionProfilesSelect {
-    border: 1px solid var(--et-edge) !important;
+    border: 1px solid rgba(196, 163, 90, 0.14) !important;
     border-radius: var(--et-radius-sm, 0.35rem) !important;
-    background: rgba(12, 10, 8, 0.55) !important;
-    color: var(--et-parchment) !important;
+    background: rgba(12, 10, 8, 0.35) !important;
+    color: var(--et-parchment-muted) !important;
+    font-size: 0.8rem !important;
 }

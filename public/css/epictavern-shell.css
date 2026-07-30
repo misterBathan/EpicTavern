@@ -26,9 +26,9 @@
     --et-radius-sm: 0.35rem;
     --et-radius: 0.55rem;
     --et-radius-lg: 0.9rem;
-    /* Shared page inset — generous so titles/body never kiss the screen edge */
-    --et-page-margin-x: clamp(2.75rem, 8vw, 6rem);
-    --et-dialogue-measure: min(64rem, calc(100vw - 2 * var(--et-page-margin-x) - var(--et-journal-rail, 0px)));
+    /* Shared page inset — large gutters (destination pages must breathe) */
+    --et-page-margin-x: clamp(10rem, 22vw, 20rem);
+    --et-dialogue-measure: min(40rem, calc(100vw - 2 * var(--et-page-margin-x) - 2 * var(--et-rpg-gutter, 0px) - var(--et-journal-rail, 0px)));
     --et-stage-pad-x: var(--et-page-margin-x);
     --et-content-measure: 100%;
     --et-journal-rail: 0px;
@@ -89,16 +89,21 @@ body.et-shell.reduced-motion *::after {
 /* ---------- AppNav ---------- */
 
 #et-app-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--et-app-nav-height);
-    z-index: 10000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3.25rem !important;
+    min-height: 3.25rem !important;
+    max-height: 3.25rem !important;
+    z-index: 2147483000 !important;
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
     align-items: center;
     gap: 0.75rem;
     padding: 0 0.85rem;
@@ -117,6 +122,20 @@ body.et-shell.reduced-motion *::after {
     font-family: 'Noto Sans', sans-serif;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+/* Chat and every other screen — AppNav must never be suppressed */
+body.et-shell #et-app-nav,
+body.et-shell[data-et-screen='chat'] #et-app-nav,
+body.et-shell[data-et-screen] #et-app-nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 0 !important;
+    z-index: 2147483000 !important;
+    height: 3.25rem !important;
+    min-height: 3.25rem !important;
 }
 
 .et-nav-brand {
@@ -446,6 +465,12 @@ body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #lm_butt
     display: none !important;
 }
 
+/* Characters is already the full screen — hide the leftover list-toggle row under the title */
+body.et-shell[data-et-screen='characters'] #CharListButtonAndHotSwaps,
+body.et-shell[data-et-screen='characters'] #rm_button_characters {
+    display: none !important;
+}
+
 /* World screen: clearer toolbar + entry workspace */
 body.et-shell[data-et-screen='world'] #WorldInfo #world_popup > .flex-container.alignitemscenter:first-of-type {
     position: sticky;
@@ -503,6 +528,6 @@ body.et-shell[data-et-screen='world'] #WorldInfo .world_entry {
     body.et-shell[data-et-screen='settings'][data-et-settings-section='ai'] #left-nav-panel,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='formatting'] #AdvancedFormatting,
     body.et-shell[data-et-screen='settings'][data-et-settings-section='backgrounds'] #Backgrounds {
-        padding: 1.25rem clamp(1.25rem, 6vw, 2rem) 2rem !important;
+        padding: 1.35rem clamp(2rem, 10vw, 5rem) 2.25rem !important;
     }
 }

@@ -1,7 +1,434 @@
 /**
- * EpicTavern Journal — Chat HUD as wide expandable stage cards; Journal screen full stage.
+ * EpicTavern RPG — Chat stage character cards + bottom-right scene strip.
+ * Legacy companion panel stays in DOM for data/handlers but is hidden on Chat.
+ * Cards sit OUTSIDE #sheld (sheld is inset) so they can never cover dialogue.
  */
 
+/* Hide stock companion chrome on Chat — stage HUD replaces it */
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel.rpg-panel,
+body.et-shell[data-et-screen='chat'] #rpg-companion-panel.et-rpg-hud,
+body.et-shell[data-et-screen='chat'] #rpg-mobile-toggle,
+body.et-shell[data-et-screen='chat'] #rpg-thought-panel,
+body.et-shell[data-et-screen='chat'] #rpg-thought-icon,
+body.et-shell[data-et-screen='chat'] #rpg-alt-present-characters {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-companion-panel,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-mobile-toggle,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-plot-buttons,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-thought-panel,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-thought-icon,
+body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-alt-present-characters {
+    display: none !important;
+}
+
+body.et-shell.et-rpg-no-active-chat #rpg-companion-panel,
+body.et-shell.et-rpg-no-active-chat #rpg-mobile-toggle,
+body.et-shell.et-rpg-no-active-chat #rpg-plot-buttons,
+body.et-shell.et-rpg-no-active-chat #rpg-thought-panel,
+body.et-shell.et-rpg-no-active-chat #rpg-thought-icon,
+body.et-shell.et-rpg-no-active-chat #rpg-alt-present-characters,
+body.et-shell.et-rpg-no-active-chat #rpg-collapse-toggle,
+body.et-shell.et-rpg-no-active-chat #et-rpg-stage {
+    display: none !important;
+}
+
+/* ---------- Stage layout tokens ---------- */
+
+body.et-shell[data-et-screen='chat'] {
+    --et-journal-rail: 0px;
+    /* Chat must not inherit destination-page mega-margins — only room for RPG cards */
+    --et-page-margin-x: clamp(0.85rem, 2vw, 1.75rem);
+    --et-rpg-card-w: clamp(10rem, 12vw, 12.25rem);
+    --et-rpg-gutter: calc(var(--et-rpg-card-w) + 1rem);
+    --et-rpg-scene-h: 0px; /* scene is bottom-right column, not under chat */
+    /* Fill the sheld column — no skinny centered strip with a distant scrollbar */
+    --et-dialogue-measure: 100%;
+}
+
+body.et-shell.et-rpg-no-active-chat[data-et-screen='chat'] {
+    --et-rpg-gutter: 0px;
+}
+
+/* Sheld inset is owned by stage.css — do not stretch sheld over the card gutters */
+body.et-shell[data-et-screen='chat'] #sheld {
+    z-index: 1100 !important;
+}
+
+body.et-shell[data-et-screen='chat'] #send_but.displayNone,
+body.et-shell[data-et-screen='chat'] #send_but {
+    display: inline-flex !important;
+}
+
+/* ---------- Stage HUD ---------- */
+
+#et-rpg-stage {
+    display: none;
+    position: fixed;
+    /* Hardcoded under AppNav (3.25) + Chat Top Bar (2.85) — never flush to viewport top */
+    top: 6.1rem !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Below #sheld so dialogue always wins if anything collides */
+    z-index: 1050;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+#et-rpg-stage.is-active {
+    display: block;
+}
+
+body.et-shell:not([data-et-screen='chat']) #et-rpg-stage {
+    display: none !important;
+}
+
+.et-rpg-col {
+    position: absolute;
+    top: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    width: var(--et-rpg-card-w);
+    max-height: calc(100% - 7.5rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    pointer-events: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196, 163, 90, 0.35) transparent;
+}
+
+.et-rpg-col--chars {
+    left: var(--et-page-margin-x);
+    align-items: stretch;
+}
+
+.et-rpg-col--player {
+    right: var(--et-page-margin-x);
+    align-items: stretch;
+}
+
+.et-rpg-card {
+    position: relative;
+    pointer-events: auto;
+    width: 100%;
+    margin-top: 1.65rem;
+    /* Portrait hangs above; keep name fully clear of the avatar */
+    padding: 2.55rem 0.7rem 0.75rem;
+    box-sizing: border-box;
+    border-radius: 0.85rem;
+    border: 1px solid var(--et-edge);
+    background:
+        linear-gradient(165deg, rgba(42, 36, 28, 0.94), rgba(18, 16, 14, 0.92)),
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(196, 163, 90, 0.12), transparent 55%);
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(232, 223, 208, 0.06);
+    color: var(--et-parchment);
+    font-family: var(--et-font-ui, 'Noto Sans', sans-serif);
+}
+
+.et-rpg-card--player {
+    border-color: rgba(196, 163, 90, 0.42);
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(196, 163, 90, 0.08),
+        inset 0 1px 0 rgba(232, 223, 208, 0.08);
+}
+
+.et-rpg-card-portrait {
+    position: absolute;
+    top: -1.55rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3.65rem;
+    height: 3.65rem;
+    border-radius: 50%;
+    border: 2px solid var(--et-brass);
+    background: var(--et-ink-deep, #0c0a08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 0 3px rgba(12, 10, 8, 0.85);
+    overflow: hidden;
+}
+
+.et-rpg-card-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.et-rpg-card-name {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    color: var(--et-parchment);
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.et-rpg-card-meta {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--et-parchment-muted);
+    margin-bottom: 0.45rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.et-rpg-card-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.et-rpg-bar-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--et-parchment-dim);
+    margin-bottom: 0.12rem;
+}
+
+.et-rpg-bar-track {
+    position: relative;
+    height: 1.1rem;
+    border-radius: 0.28rem;
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    /* Brighter fill: mid → vivid high (empty portion is the overlay) */
+    background: linear-gradient(90deg, var(--et-bar-low), var(--et-bar-high) 55%, color-mix(in srgb, var(--et-bar-high) 85%, white));
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.et-rpg-bar-fill {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 8, 6, 0.78);
+    transition: width 280ms ease;
+}
+
+.et-rpg-bar-value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #f4ebe0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.et-rpg-card-actions {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+    padding-top: 0.2rem;
+}
+
+.et-rpg-action {
+    appearance: none;
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 50%;
+    border: 1px solid var(--et-edge-strong);
+    background:
+        radial-gradient(circle at 30% 25%, rgba(232, 223, 208, 0.16), transparent 45%),
+        linear-gradient(160deg, rgba(42, 36, 28, 0.95), rgba(18, 16, 14, 0.98));
+    color: var(--et-brass-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    transition: transform 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.et-rpg-action:hover {
+    transform: translateY(-2px);
+    border-color: var(--et-brass);
+    color: var(--et-parchment);
+}
+
+.et-rpg-action i {
+    font-size: 1.05rem;
+}
+
+/* Scene / weather — bottom RIGHT, no panel chrome, vertical stack */
+.et-rpg-scene {
+    position: absolute;
+    right: var(--et-page-margin-x);
+    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+    width: var(--et-rpg-card-w);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    padding: 0;
+    box-sizing: border-box;
+    pointer-events: auto;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    color: var(--et-parchment);
+    font-size: 0.78rem;
+    line-height: 1.3;
+    box-shadow: none;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.et-rpg-scene-weather {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 0.45rem;
+    row-gap: 0.1rem;
+    align-items: start;
+}
+
+.et-rpg-scene-sky {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--et-parchment);
+    line-height: 1.15;
+}
+
+.et-rpg-scene-sky-icon {
+    font-size: 1.55rem;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.et-rpg-scene-temp {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--et-parchment-muted);
+    white-space: nowrap;
+    padding-top: 0.15rem;
+}
+
+.et-rpg-scene-bit {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    white-space: normal;
+    color: var(--et-parchment-muted);
+    font-size: 0.78rem;
+}
+
+.et-rpg-scene-bit i {
+    opacity: 0.8;
+    font-size: 0.72rem;
+    margin-top: 0.15rem;
+    flex: 0 0 auto;
+}
+
+.et-rpg-scene-sep {
+    display: none;
+}
+
+.et-rpg-scene-muted {
+    opacity: 0.65;
+    font-style: italic;
+}
+
+/* Flyout for skills / inventory / quests / presence */
+#et-rpg-flyout {
+    position: fixed;
+    inset: 0;
+    z-index: 14000;
+    background: rgba(8, 6, 4, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    box-sizing: border-box;
+}
+
+#et-rpg-flyout[hidden] {
+    display: none !important;
+}
+
+.et-rpg-flyout-panel {
+    width: min(34rem, 92vw);
+    max-height: min(70vh, 40rem);
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--et-radius-lg, 0.9rem);
+    border: 1px solid var(--et-edge);
+    background: linear-gradient(180deg, rgba(28, 24, 20, 0.98), rgba(14, 12, 10, 0.98));
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+    color: var(--et-parchment);
+}
+
+.et-rpg-flyout-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--et-edge);
+}
+
+.et-rpg-flyout-title {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.et-rpg-flyout-close {
+    appearance: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--et-radius-sm);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--et-parchment-muted);
+    cursor: pointer;
+}
+
+.et-rpg-flyout-close:hover {
+    color: var(--et-brass-soft);
+    border-color: var(--et-edge);
+}
+
+.et-rpg-flyout-body {
+    padding: 0.85rem 1rem 1.1rem;
+    overflow: auto;
+    min-height: 8rem;
+}
+
+.et-rpg-flyout-empty {
+    opacity: 0.7;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+/* Journal screen keeps full companion panel */
 #et-journal-screen {
     display: none;
 }
@@ -22,361 +449,25 @@ body.et-shell[data-et-screen='journal'] #et-journal-screen {
     padding: 0 !important;
 }
 
-body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-companion-panel,
-body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-mobile-toggle,
-body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-plot-buttons,
-body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-thought-panel,
-body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-thought-icon,
-body.et-shell:not([data-et-screen='chat']):not([data-et-screen='journal']) #rpg-alt-present-characters {
-    display: none !important;
-}
-
-body.et-shell.et-rpg-no-active-chat #rpg-companion-panel,
-body.et-shell.et-rpg-no-active-chat #rpg-mobile-toggle,
-body.et-shell.et-rpg-no-active-chat #rpg-plot-buttons,
-body.et-shell.et-rpg-no-active-chat #rpg-thought-panel,
-body.et-shell.et-rpg-no-active-chat #rpg-thought-icon,
-body.et-shell.et-rpg-no-active-chat #rpg-alt-present-characters,
-body.et-shell.et-rpg-no-active-chat #rpg-collapse-toggle {
-    display: none !important;
-}
-
-/* ---------- Chat: wide expandable cards (readable, not a skinny rail) ---------- */
-
-body.et-shell[data-et-screen='chat'] {
-    --et-journal-rail: min(28rem, 34vw);
-}
-
-body.et-shell.et-rpg-no-active-chat[data-et-screen='chat'],
-body.et-shell[data-et-screen='chat']:has(#chat > .welcomePanel):not(:has(#chat > .mes[mesid])) {
-    --et-journal-rail: 0px;
-}
-
-body.et-shell[data-et-screen='chat'] #sheld {
-    z-index: 1100 !important;
-    right: calc(var(--et-journal-rail) + var(--et-page-margin-x) + 0.5rem) !important;
-    width: auto !important;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel.rpg-panel,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel.et-rpg-hud {
+body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel {
+    display: flex !important;
+    pointer-events: auto !important;
     position: fixed !important;
-    top: calc(var(--et-app-nav-height) + var(--et-scene-tools-height, 2.85rem) + 0.75rem) !important;
+    top: calc(var(--et-app-nav-height) + 0.75rem) !important;
+    left: var(--et-page-margin-x) !important;
     right: var(--et-page-margin-x) !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: var(--et-journal-rail) !important;
-    max-width: var(--et-journal-rail) !important;
-    min-width: 18rem !important;
-    height: auto !important;
-    max-height: calc(100dvh - var(--et-app-nav-height) - var(--et-scene-tools-height, 2.85rem) - 7rem) !important;
-    margin: 0 !important;
-    padding: 0.15rem !important;
-    border: none !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    z-index: 1300 !important;
-    pointer-events: auto !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0.7rem !important;
-    animation: none !important;
-    --rpg-bg: transparent;
-    --rpg-text: var(--et-parchment);
-    --rpg-border: var(--et-edge);
-    scrollbar-width: thin;
-    scrollbar-color: rgba(196, 163, 90, 0.35) transparent;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel::-webkit-scrollbar-thumb {
-    background: rgba(196, 163, 90, 0.35);
-    border-radius: 999px;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-collapse-toggle,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-strip-widget-container,
-body.et-shell[data-et-screen='chat'] #rpg-mobile-toggle,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-settings-buttons-row,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel #rpg-manual-update,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-features-row,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-tabs-nav,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-tabs-container > .rpg-tabs-nav,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-hide-on-chat,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-divider,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel #rpg-clear-dice {
-    display: none !important;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-tab-content {
-    display: contents !important;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-game-container,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel #rpg-panel-content,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-content-box {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0.7rem !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: visible !important;
-    min-height: 0 !important;
-    height: auto !important;
-    max-height: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-panel-header {
-    order: 50;
-    display: flex !important;
-    align-items: center;
-    justify-content: flex-end;
-    border: none !important;
-    background: transparent !important;
-    margin: 0.15rem 0 0 !important;
-    padding: 0 !important;
-    min-height: 0 !important;
-    width: 100%;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-panel-header h3 {
-    display: none !important;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-panel-header-actions {
-    display: flex !important;
-    gap: 0.45rem;
-    justify-content: flex-end;
-    padding: 0.1rem;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-panel-header-actions .rpg-btn-icon {
-    width: 2.15rem;
-    height: 2.15rem;
-    border: 1px solid var(--et-edge);
-    border-radius: var(--et-radius-sm);
-    background: var(--et-surface-solid);
-    color: var(--et-parchment-muted);
-    cursor: pointer;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .rpg-panel-header-actions .rpg-btn-icon:hover {
-    color: var(--et-brass-soft);
-    border-color: var(--et-edge-strong);
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel #rpg-dice-display,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel #rpg-smart-update-status {
-    border: 1px solid var(--et-edge);
-    border-radius: var(--et-radius);
-    background: var(--et-surface-solid);
-    color: var(--et-parchment-muted);
-    font-size: var(--et-type-sm);
-    padding: 0.65rem 0.85rem;
-    line-height: 1.35;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card {
-    border: 1px solid var(--et-edge) !important;
-    border-radius: var(--et-radius-lg) !important;
-    background: var(--et-surface-solid) !important;
-    color: var(--et-parchment) !important;
-    overflow: hidden;
-    max-height: 3.15rem;
-    width: 100%;
-    box-sizing: border-box;
-    transition: max-height 240ms ease, border-color 160ms ease, box-shadow 160ms ease;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
-    pointer-events: auto !important;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card.is-open {
-    max-height: min(56vh, 28rem);
-    border-color: var(--et-edge-strong) !important;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card-toggle {
-    appearance: none;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    border: none;
-    background: rgba(12, 10, 8, 0.35);
-    color: var(--et-brass-soft);
-    font: inherit;
-    font-size: 1rem;
-    font-weight: 650;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    text-align: left;
-    box-sizing: border-box;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card-toggle:hover {
-    background: rgba(196, 163, 90, 0.12);
-    color: var(--et-parchment);
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card-toggle i {
-    font-size: 0.75rem;
-    opacity: 0.75;
-    transition: transform 160ms ease;
-    flex: 0 0 auto;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card.is-open .et-rpg-card-toggle i {
-    transform: rotate(180deg);
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card > :not(.et-rpg-card-toggle) {
-    display: none;
-    padding: 0.85rem 1rem 1.1rem;
-    max-height: calc(min(56vh, 28rem) - 3.15rem);
-    overflow: auto;
-    font-size: 0.92rem;
-    line-height: 1.5;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(196, 163, 90, 0.35) transparent;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card.is-open > :not(.et-rpg-card-toggle) {
-    display: block;
-}
-
-/* Give quest/inventory controls room to breathe */
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card .menu_button,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card button {
-    margin: 0.2rem 0.25rem 0.2rem 0 !important;
-    white-space: normal !important;
-    max-width: 100%;
-}
-
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card .flex-container,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card .rpg-quest-tabs,
-body.et-shell[data-et-screen='chat'] #rpg-companion-panel .et-rpg-card .rpg-section-header {
-    flex-wrap: wrap !important;
-    gap: 0.45rem !important;
-}
-
-body.et-shell[data-et-screen='chat'] #form_sheld,
-body.et-shell[data-et-screen='chat'] #send_form {
-    position: relative;
-    z-index: 1400;
-}
-
-body.et-shell[data-et-screen='chat'] #send_but.displayNone,
-body.et-shell[data-et-screen='chat'] #send_but {
-    display: flex !important;
-}
-
-body.et-shell #send_but.et-send-disconnected {
-    opacity: 0.45;
-    filter: grayscale(0.35);
-    cursor: pointer;
+    bottom: 1rem !important;
+    width: auto !important;
+    max-width: none !important;
+    z-index: 3600 !important;
 }
 
 #et-app-nav .et-nav-item[data-et-screen='connect'].et-nav-disconnected {
-    color: #e07070;
-    border-color: rgba(224, 112, 112, 0.45);
-    background: rgba(224, 112, 112, 0.12);
+    color: #c45a5a;
 }
 
 #et-app-nav .et-nav-item[data-et-screen='connect'].et-nav-connected:not(.is-active) {
-    color: #8fce8f;
-}
-
-/* ---------- Journal full screen ---------- */
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel,
-body.et-rpg-journal-open #rpg-companion-panel.rpg-panel {
-    position: fixed !important;
-    top: var(--et-app-nav-height) !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    height: auto !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    border: none !important;
-    border-top: 1px solid var(--et-edge) !important;
-    z-index: 4000 !important;
-    box-shadow: none !important;
-    pointer-events: auto;
-    overflow: auto !important;
-    padding: 1.35rem var(--et-page-margin-x) 2rem !important;
-    background:
-        linear-gradient(180deg, rgba(22, 18, 14, 0.98), rgba(12, 10, 8, 0.96)),
-        var(--et-ink-deep) !important;
-    animation: et-stage-fade 320ms ease-out;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-game-container {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    display: flex !important;
-    flex: 1;
-    overflow: auto;
-    max-width: min(56rem, 100%);
-    margin: 0 auto;
-    width: 100%;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-collapse-toggle,
-body.et-shell[data-et-screen='journal'] #rpg-mobile-toggle,
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-strip-widget-container {
-    display: none !important;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .rpg-panel-header {
-    font-family: var(--et-font-ui);
-    color: var(--et-parchment);
-    border-bottom: 1px solid var(--et-edge);
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel #rpg-panel-title {
-    font-size: var(--et-type-xl);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .et-rpg-card-toggle {
-    display: none !important;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .et-rpg-card {
-    max-height: none !important;
-    border: 1px solid var(--et-edge);
-    border-radius: var(--et-radius);
-    background: rgba(28, 24, 20, 0.55);
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.75rem;
-}
-
-body.et-shell[data-et-screen='journal'] #rpg-companion-panel .et-rpg-card > :not(.et-rpg-card-toggle) {
-    display: block !important;
+    color: #6bbf7a;
 }
 
 body.et-shell #rpg-companion-panel.rpg-panel {
@@ -388,21 +479,28 @@ body.et-shell #rpg-companion-panel.rpg-panel {
 
 @media (max-width: 1100px) {
     body.et-shell[data-et-screen='chat'] {
-        --et-journal-rail: min(24rem, 38vw);
+        --et-rpg-card-w: 9.25rem;
+        --et-rpg-gutter: calc(var(--et-rpg-card-w) + 1rem);
+    }
+
+    .et-rpg-action {
+        width: 2.45rem;
+        height: 2.45rem;
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
     body.et-shell[data-et-screen='chat'] {
-        --et-journal-rail: 0px;
+        --et-rpg-gutter: 0px;
     }
 
-    body.et-shell[data-et-screen='chat'] #sheld {
-        right: 0 !important;
-        width: 100% !important;
+    .et-rpg-col--chars,
+    .et-rpg-col--player {
+        display: none;
     }
 
-    body.et-shell[data-et-screen='chat'] #rpg-companion-panel.rpg-panel {
-        display: none !important;
+    .et-rpg-scene {
+        right: var(--et-page-margin-x);
+        width: min(12rem, 42vw);
     }
 }

@@ -776,11 +776,15 @@ function renderUserStatsTab() {
     config.customStats.forEach((stat, index) => {
         const showMaxValue = statsDisplayMode === 'number';
         const maxValue = stat.maxValue || 100;
+        const colorHigh = stat.colorHigh || '#c4a35a';
+        const colorLow = stat.colorLow || '#3a3428';
         html += `
             <div class="rpg-editor-stat-item" data-index="${index}">
                 <input type="checkbox" ${stat.enabled ? 'checked' : ''} class="rpg-stat-toggle" data-index="${index}">
                 <input type="text" value="${stat.name}" class="rpg-stat-name" data-index="${index}" placeholder="Stat Name">
                 <input type="number" value="${maxValue}" class="rpg-stat-max ${showMaxValue ? '' : 'rpg-hidden'}" data-index="${index}" placeholder="Max" min="1" step="1" title="Maximum value">
+                <input type="color" value="${colorLow}" class="rpg-stat-color-low" data-index="${index}" title="Low color">
+                <input type="color" value="${colorHigh}" class="rpg-stat-color-high" data-index="${index}" title="High / bar color">
                 <button class="rpg-stat-remove" data-index="${index}" title="Remove stat"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
@@ -926,6 +930,16 @@ function setupUserStatsListeners() {
         const index = $(this).data('index');
         const value = parseInt($(this).val()) || 100;
         extensionSettings.trackerConfig.userStats.customStats[index].maxValue = Math.max(1, value);
+    });
+
+    // Stat bar colors
+    $('.rpg-stat-color-low').off('change').on('change', function () {
+        const index = $(this).data('index');
+        extensionSettings.trackerConfig.userStats.customStats[index].colorLow = String($(this).val());
+    });
+    $('.rpg-stat-color-high').off('change').on('change', function () {
+        const index = $(this).data('index');
+        extensionSettings.trackerConfig.userStats.customStats[index].colorHigh = String($(this).val());
     });
 
     // Stats display mode toggle
@@ -1221,10 +1235,14 @@ function renderPresentCharactersTab() {
 
     const charStats = config.characterStats?.customStats || [];
     charStats.forEach((stat, index) => {
+        const colorHigh = stat.colorHigh || '#c4a35a';
+        const colorLow = stat.colorLow || '#3a3428';
         html += `
             <div class="rpg-editor-field-item" data-index="${index}">
                 <input type="checkbox" ${stat.enabled ? 'checked' : ''} class="rpg-char-stat-toggle" data-index="${index}">
                 <input type="text" value="${stat.name}" class="rpg-char-stat-label" data-index="${index}" placeholder="Stat Name (e.g., Health)">
+                <input type="color" value="${colorLow}" class="rpg-char-stat-color-low" data-index="${index}" title="Low color">
+                <input type="color" value="${colorHigh}" class="rpg-char-stat-color-high" data-index="${index}" title="High / bar color">
                 <button class="rpg-field-remove rpg-char-stat-remove" data-index="${index}" title="Remove stat"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
@@ -1483,6 +1501,16 @@ function setupPresentCharactersListeners() {
         const value = $(this).val();
         const list_with_stats = extensionSettings.trackerConfig.presentCharacters.characterStats.customStats
         set_ids_names(list_with_stats, index, value);
+    });
+
+    // Character stat bar colors
+    $('.rpg-char-stat-color-low').off('change').on('change', function () {
+        const index = $(this).data('index');
+        extensionSettings.trackerConfig.presentCharacters.characterStats.customStats[index].colorLow = String($(this).val());
+    });
+    $('.rpg-char-stat-color-high').off('change').on('change', function () {
+        const index = $(this).data('index');
+        extensionSettings.trackerConfig.presentCharacters.characterStats.customStats[index].colorHigh = String($(this).val());
     });
 }
 
