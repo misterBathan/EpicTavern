@@ -20,7 +20,7 @@ body.et-shell[data-et-screen='memory'] #et-memory-screen {
     border: none !important;
     border-top: 1px solid var(--et-edge, rgba(196, 163, 90, 0.28)) !important;
     border-radius: 0 !important;
-    padding: 1.5rem clamp(1.25rem, 5vw, 3.5rem) 2.5rem !important;
+    padding: 1.5rem clamp(1.25rem, 5vw, 3.5rem) var(--et-page-pad-bottom, 4.5rem) !important;
     overflow-x: hidden;
     overflow-y: auto;
     background:

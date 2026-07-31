@@ -109,6 +109,8 @@ body.et-shell:not([data-et-screen='chat']) #et-rpg-stage {
 .et-rpg-col--player {
     right: var(--et-page-margin-x);
     align-items: stretch;
+    /* Leave clear room for the full weather/date/location stack */
+    max-height: calc(100% - 11.5rem);
 }
 
 .et-rpg-card {
@@ -131,7 +133,8 @@ body.et-shell:not([data-et-screen='chat']) #et-rpg-stage {
     font-family: var(--et-font-ui, 'Noto Sans', sans-serif);
 }
 
-.et-rpg-card--player {
+.et-rpg-card--player,
+.et-rpg-card--npc {
     border-color: rgba(196, 163, 90, 0.42);
     box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.45),
@@ -202,8 +205,8 @@ body.et-shell:not([data-et-screen='chat']) #et-rpg-stage {
     height: 1.1rem;
     border-radius: 0.28rem;
     border: 1px solid rgba(0, 0, 0, 0.45);
-    /* Brighter fill: mid → vivid high (empty portion is the overlay) */
-    background: linear-gradient(90deg, var(--et-bar-low), var(--et-bar-high) 55%, color-mix(in srgb, var(--et-bar-high) 85%, white));
+    /* Soft fill — no white hot-spot at the high end */
+    background: linear-gradient(90deg, var(--et-bar-low), var(--et-bar-high));
     overflow: hidden;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
@@ -268,17 +271,21 @@ body.et-shell:not([data-et-screen='chat']) #et-rpg-stage {
     font-size: 1.05rem;
 }
 
-/* Scene / weather — bottom RIGHT, no panel chrome, vertical stack */
+/* Scene / weather — bottom RIGHT, fully visible above the send dock */
 .et-rpg-scene {
     position: absolute;
     right: var(--et-page-margin-x);
-    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+    /* Sit above the send/VN dock — never clipped by the viewport edge */
+    bottom: calc(var(--et-vn-send-dock-h, 8.5rem) + 0.75rem + env(safe-area-inset-bottom, 0px));
     width: var(--et-rpg-card-w);
+    max-height: min(36vh, 16rem);
+    overflow-x: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.4rem;
-    padding: 0;
+    gap: 0.35rem;
+    padding: 0.15rem 0.1rem;
     box-sizing: border-box;
     pointer-events: auto;
     border: none;
@@ -291,6 +298,14 @@ body.et-shell:not([data-et-screen='chat']) #et-rpg-stage {
     line-height: 1.3;
     box-shadow: none;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+    /* Above #sheld so date/location never sit under the chat column */
+    z-index: 1205;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196, 163, 90, 0.3) transparent;
+}
+
+body.et-shell:not([data-et-screen='chat']) .et-rpg-scene {
+    bottom: calc(1.35rem + env(safe-area-inset-bottom, 0px));
 }
 
 .et-rpg-scene-weather {
@@ -456,7 +471,7 @@ body.et-shell[data-et-screen='journal'] #rpg-companion-panel.rpg-panel {
     top: calc(var(--et-app-nav-height) + 0.75rem) !important;
     left: var(--et-page-margin-x) !important;
     right: var(--et-page-margin-x) !important;
-    bottom: 1rem !important;
+    bottom: var(--et-page-pad-bottom, 4.5rem) !important;
     width: auto !important;
     max-width: none !important;
     z-index: 3600 !important;

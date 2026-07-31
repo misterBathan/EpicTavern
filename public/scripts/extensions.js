@@ -34,6 +34,13 @@ export let extensionTypes = {};
 export let modules = [];
 
 /**
+ * Built-in EpicTavern features that still live under scripts/extensions/
+ * for templates/assets, but are not loaded, listed, or toggled as plugins.
+ * @type {ReadonlySet<string>}
+ */
+export const CORE_FEATURES = Object.freeze(new Set(['expressions']));
+
+/**
  * A set of active extensions.
  * @type {Set<string>}
  */
@@ -489,6 +496,10 @@ export async function enableExtension(name, reload = true) {
  * @param {boolean} [reload=true] If true, reload the page after disabling the extension
  */
 export async function disableExtension(name, reload = true) {
+    if (CORE_FEATURES.has(name)) {
+        toastr.info(t`This feature is built into EpicTavern and cannot be disabled.`);
+        return;
+    }
     await callExtensionHook(name, 'disable');
     extension_settings.disabledExtensions.push(name);
     stateChanged = true;
@@ -582,6 +593,11 @@ async function activateExtensions() {
         const displayName = manifest.display_name || name;
 
         if (activeExtensions.has(name)) {
+            continue;
+        }
+
+        // Core EpicTavern features are initialized outside the extension loader.
+        if (CORE_FEATURES.has(name)) {
             continue;
         }
         // Client version requirement: pass if 'minimum_client_version' is undefined or null.
@@ -1167,7 +1183,10 @@ async function showExtensionsDetails() {
         const sortOrderKey = 'extensions_sortByName';
         const sortByName = accountStorage.getItem(sortOrderKey) === 'true';
         const sortFn = sortByName ? sortManifestsByName : sortManifestsByOrder;
-        const extensions = Object.entries(manifests).sort((a, b) => sortFn(a[1], b[1])).map(getExtensionData);
+        const extensions = Object.entries(manifests)
+            .filter(([name]) => !CORE_FEATURES.has(name))
+            .sort((a, b) => sortFn(a[1], b[1]))
+            .map(getExtensionData);
         let extensionsToToggle = [];
 
         extensions.forEach(value => {
@@ -1784,6 +1803,11 @@ export async function installExtension(url, global, branch = '') {
 export async function loadExtensionSettings(settings, versionChanged, enableAutoUpdate) {
     if (settings.extension_settings) {
         Object.assign(extension_settings, settings.extension_settings);
+    }
+
+    // Core features cannot be soft-disabled via Manage Extensions.
+    if (Array.isArray(extension_settings.disabledExtensions)) {
+        extension_settings.disabledExtensions = extension_settings.disabledExtensions.filter(x => !CORE_FEATURES.has(x));
     }
 
     $('#extensions_url').val(extension_settings.apiUrl);

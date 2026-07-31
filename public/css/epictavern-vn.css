@@ -1,0 +1,473 @@
+/**
+ * EpicTavern Visual Novel presentation (body.waifuMode + et-shell chat).
+ * Send dock is viewport-fixed at bottom (no gap). Dialogue sits above it.
+ * History shows the real #chat message panels — never the VN dialogue box.
+ */
+
+/* ---------- Stage under chrome ---------- */
+
+body.et-shell.waifuMode[data-et-screen='chat'] #et-rpg-stage {
+    z-index: 1060 !important;
+    top: 6.1rem !important;
+}
+
+/* Sheld is a positioning shell only — send dock is fixed to the viewport */
+body.et-shell.waifuMode[data-et-screen='chat'] #sheld {
+    top: 6.1rem !important;
+    bottom: 0 !important;
+    left: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    right: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    background: transparent !important;
+    z-index: 1120 !important;
+    overflow: visible !important;
+    pointer-events: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #sheld > * {
+    pointer-events: auto;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #chat {
+    display: none !important;
+}
+
+/* NUCLEAR: send dock glued to viewport bottom — never leaves a dead band */
+body.et-shell.waifuMode[data-et-screen='chat']:not(.et-vn-history-open) #form_sheld {
+    position: fixed !important;
+    left: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    right: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 0.35rem 0 !important;
+    background: transparent !important;
+    z-index: 1140 !important;
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    transform: none !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat']:not(.et-vn-history-open) #send_form {
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* ---------- Expression sprite ---------- */
+
+body.et-shell.waifuMode[data-et-screen='chat'] #expression-wrapper {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-end !important;
+    position: fixed !important;
+    top: 6.1rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: auto !important;
+    max-height: none !important;
+    z-index: 1070 !important;
+    pointer-events: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #expression-holder,
+body.et-shell.waifuMode[data-et-screen='chat'] .expression-holder {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    bottom: 0 !important;
+    top: auto !important;
+    margin: 0 !important;
+    width: auto !important;
+    max-width: min(56vw, 42rem) !important;
+    height: calc(100dvh - 6.1rem) !important;
+    max-height: calc(100dvh - 6.1rem) !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    resize: none !important;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.55)) !important;
+    z-index: 1075 !important;
+    pointer-events: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #expression-image,
+body.et-shell.waifuMode[data-et-screen='chat'] .expression-holder img,
+body.et-shell.waifuMode[data-et-screen='chat'] #expression-image.expression {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: auto !important;
+    height: 100% !important;
+    max-height: calc(100dvh - 6.1rem) !important;
+    max-width: min(56vw, 42rem) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    vertical-align: bottom !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ---------- VN dialogue (hidden in history) ---------- */
+
+#et-vn-dialogue {
+    display: none;
+    box-sizing: border-box;
+    max-height: min(38vh, 18rem);
+    min-height: 6.5rem;
+    padding: 0.85rem 1.1rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(196, 163, 90, 0.4);
+    background:
+        linear-gradient(180deg, rgba(28, 24, 20, 0.94), rgba(14, 12, 10, 0.96));
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.35),
+        0 16px 40px rgba(0, 0, 0, 0.5);
+    color: var(--et-parchment);
+    font-family: var(--et-font-ui, 'Noto Sans', sans-serif);
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat']:not(.et-vn-history-open) #et-vn-dialogue.is-active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.45rem;
+    position: fixed !important;
+    left: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    right: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    bottom: calc(var(--et-vn-send-dock-h, 7.5rem) + 0.2rem) !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    z-index: 1130 !important;
+    max-height: min(38vh, 18rem) !important;
+    min-height: 6.5rem !important;
+}
+
+/* Hard-hide VN box whenever history is open — all states / placements */
+body.et-shell.et-vn-history-open #et-vn-dialogue,
+body.et-shell.et-vn-history-open #et-vn-dialogue.is-active,
+body.et-shell.waifuMode.et-vn-history-open #et-vn-dialogue,
+body.et-shell.waifuMode.et-vn-history-open #et-vn-dialogue.is-active,
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #et-vn-dialogue,
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #et-vn-dialogue.is-active,
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #sheld > #et-vn-dialogue {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.et-vn-dialogue-chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex: 0 0 auto;
+}
+
+.et-vn-dialogue-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--et-brass-soft);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.et-vn-history-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 0.4rem;
+    border: 1px solid rgba(196, 163, 90, 0.28);
+    background: rgba(12, 10, 8, 0.45);
+    color: var(--et-parchment-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.et-vn-history-btn:hover {
+    color: var(--et-brass-soft);
+    border-color: rgba(196, 163, 90, 0.5);
+    background: rgba(196, 163, 90, 0.1);
+}
+
+.et-vn-dialogue-text {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    font-style: normal;
+    color: var(--et-parchment);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196, 163, 90, 0.3) transparent;
+    padding-right: 0.25rem;
+}
+
+.et-vn-dialogue-text p {
+    margin: 0 0 0.5em;
+}
+
+.et-vn-dialogue-text p:last-child {
+    margin-bottom: 0;
+}
+
+.et-vn-dialogue-text em,
+.et-vn-dialogue-text i,
+.et-vn-dialogue-text .et-vn-action {
+    font-style: italic;
+    font-weight: 400;
+    color: rgba(185, 174, 156, 0.72);
+    opacity: 1;
+}
+
+.et-vn-dialogue-text .et-vn-speech {
+    font-style: normal !important;
+    font-weight: 500;
+    color: var(--et-parchment) !important;
+    opacity: 1 !important;
+}
+
+.et-vn-dialogue-empty {
+    opacity: 0.55;
+    font-style: italic;
+}
+
+/* ---------- History: real #chat panels + fixed Close bar ---------- */
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #sheld {
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    pointer-events: auto !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    order: 10 !important;
+    padding: 0.5rem 0.25rem 4.25rem !important;
+    margin: 0 !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196, 163, 90, 0.45) rgba(12, 10, 8, 0.35);
+    pointer-events: auto !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat::-webkit-scrollbar {
+    width: 0.45rem;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat::-webkit-scrollbar-thumb {
+    background: rgba(196, 163, 90, 0.4);
+    border-radius: 999px;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat::-webkit-scrollbar-track {
+    background: rgba(12, 10, 8, 0.35);
+}
+
+/* Smaller message text in history */
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat .mes {
+    padding: 0.55rem 0.7rem 0.65rem !important;
+    margin: 0 0 0.65rem !important;
+    gap: 0.45rem !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat .mes .mesAvatarWrapper .avatar {
+    width: 2.35rem !important;
+    height: 2.35rem !important;
+    min-width: 2.35rem !important;
+    min-height: 2.35rem !important;
+    max-width: 2.35rem !important;
+    max-height: 2.35rem !important;
+    flex-basis: 2.35rem !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat .mes .name_text {
+    font-size: 0.88rem !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat .mes .mes_text {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #chat .mes .timestamp {
+    font-size: 0.68rem !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #expression-wrapper,
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #expression-holder {
+    opacity: 0.12 !important;
+    pointer-events: none !important;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #et-rpg-stage .et-rpg-col {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+body.et-shell.waifuMode.et-vn-history-open[data-et-screen='chat'] #form_sheld {
+    display: none !important;
+}
+
+/* Fixed Close bar — always visible, no hunting */
+.et-vn-history-bar {
+    display: none;
+    position: fixed !important;
+    left: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    right: calc(var(--et-page-margin-x) + var(--et-rpg-gutter, 0px)) !important;
+    bottom: 0 !important;
+    z-index: 2147482800 !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    margin: 0 !important;
+    border-radius: 0.65rem 0.65rem 0 0;
+    border: 1px solid rgba(196, 163, 90, 0.35);
+    border-bottom: none;
+    background: linear-gradient(165deg, rgba(42, 36, 28, 0.98), rgba(18, 16, 14, 0.97));
+    color: var(--et-parchment, #e8dfd0);
+    pointer-events: auto;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.45);
+}
+
+body.et-shell.waifuMode.et-vn-history-open #et-vn-history-bar {
+    display: flex !important;
+}
+
+.et-vn-history-bar-title {
+    font-family: var(--et-font-ui, 'Noto Sans', sans-serif);
+    font-weight: 600;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    color: var(--et-brass-soft, #e0c989);
+}
+
+.et-vn-history-close {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 !important;
+    padding: 0.45rem 0.95rem !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(196, 163, 90, 0.45) !important;
+    background: rgba(196, 163, 90, 0.16) !important;
+    color: var(--et-parchment) !important;
+    cursor: pointer;
+}
+
+.et-vn-history-close:hover {
+    background: rgba(196, 163, 90, 0.28) !important;
+}
+
+/* ---------- Header must stay above VN / RPG ---------- */
+
+body.et-shell.waifuMode[data-et-screen='chat'] #et-app-nav,
+body.et-shell[data-et-screen='chat'] #et-app-nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3.25rem !important;
+    min-height: 3.25rem !important;
+    z-index: 2147483000 !important;
+    transform: none !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #etChatTopBar,
+body.et-shell[data-et-screen='chat'] #etChatTopBar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 3.25rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 2.85rem !important;
+    z-index: 2147482900 !important;
+    transform: none !important;
+}
+
+/* Kill legacy ST top chrome that can cover / confuse the header */
+body.et-shell[data-et-screen='chat'] #top-bar,
+body.et-shell[data-et-screen='chat'] #top-settings-holder {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+@media (max-width: 900px) {
+    body.et-shell.waifuMode[data-et-screen='chat'] #expression-holder,
+    body.et-shell.waifuMode[data-et-screen='chat'] .expression-holder {
+        max-width: min(78vw, 26rem) !important;
+        height: calc(100dvh - 6.1rem - 34vh) !important;
+        max-height: calc(100dvh - 6.1rem - 34vh) !important;
+    }
+
+    body.et-shell.waifuMode[data-et-screen='chat']:not(.et-vn-history-open) #et-vn-dialogue.is-active {
+        max-height: min(34vh, 16rem) !important;
+    }
+}

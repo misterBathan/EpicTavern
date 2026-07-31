@@ -110,6 +110,11 @@ function showNativeExpressionDisplay() {
 }
 
 function updateNativeExpressionDisplayVisibility() {
+    // EpicTavern Visual Novel needs the native expression sprite — never hide it there.
+    if (document.body.classList.contains('waifuMode') && document.body.dataset.etScreen === 'chat') {
+        showNativeExpressionDisplay();
+        return;
+    }
     if (shouldHideNativeExpressionDisplay()) {
         hideNativeExpressionDisplay();
     } else {

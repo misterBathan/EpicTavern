@@ -391,7 +391,15 @@ body.waifuMode #top-bar {
     border: 1px solid var(--SmartThemeBorderColor);
 }
 
-body.waifuMode #sheld {
+/* EpicTavern owns VN layout — do NOT use stock SillyTavern 40vh bottom dock */
+body.et-shell.waifuMode #sheld {
+    height: auto !important;
+    max-height: none !important;
+    top: 6.1rem !important;
+    bottom: 0 !important;
+}
+
+body:not(.et-shell).waifuMode #sheld {
     height: 40vh;
     height: 40dvh;
     top: calc(100% - 40vh);

@@ -86,6 +86,30 @@ function getIcons() {
             },
         },
         {
+            id: 'etChatTopBarVisualNovel',
+            icon: 'fa-fw fa-solid fa-masks-theater',
+            position: 'middle',
+            title: t`Visual Novel mode`,
+            isTemporaryAllowed: true,
+            onClick: () => {
+                const input = document.getElementById('waifuMode');
+                if (input instanceof HTMLInputElement) {
+                    input.checked = !input.checked;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            },
+        },
+        {
+            id: 'etChatTopBarVnHistory',
+            icon: 'fa-fw fa-solid fa-clock-rotate-left',
+            position: 'middle',
+            title: t`Dialogue history`,
+            isTemporaryAllowed: true,
+            onClick: () => {
+                document.getElementById('et-vn-history-btn')?.click();
+            },
+        },
+        {
             id: 'etChatTopBarChatManager',
             icon: 'fa-fw fa-solid fa-address-book',
             position: 'right',

@@ -253,10 +253,26 @@ function ensureSettingsTabs() {
 }
 
 /**
- * @param {EtScreen} screen
- * @param {{ updateHash?: boolean, settingsSection?: EtSettingsSection }} [options]
+ * Best-effort chat id without importing script.js (circular).
+ * @returns {string|null|undefined} chat id, null if definitely none, undefined if unknown
  */
-export function navigate(screen, { updateHash = true, settingsSection } = {}) {
+function peekCurrentChatId() {
+    try {
+        const ctx = globalThis.SillyTavern?.getContext?.();
+        if (!ctx || typeof ctx.getCurrentChatId !== 'function') {
+            return undefined;
+        }
+        return ctx.getCurrentChatId() || null;
+    } catch {
+        return undefined;
+    }
+}
+
+/**
+ * @param {EtScreen} screen
+ * @param {{ updateHash?: boolean, settingsSection?: EtSettingsSection, force?: boolean }} [options]
+ */
+export function navigate(screen, { updateHash = true, settingsSection, force = false } = {}) {
     if (!Object.prototype.hasOwnProperty.call(ET_SCREENS, screen)) {
         screen = 'home';
     }
@@ -277,6 +293,16 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
 
     const previous = currentScreen;
     const previousSection = currentSettingsSection;
+
+    // Never show Chat chrome without a loaded conversation (unless caller forces it).
+    if (screen === 'chat' && !force) {
+        const chatId = peekCurrentChatId();
+        // null = context available and no chat; undefined = can't tell yet — allow
+        if (chatId === null) {
+            screen = 'chats';
+        }
+    }
+
     currentScreen = screen;
 
     document.body.classList.add('et-shell');
@@ -355,6 +381,19 @@ export function navigate(screen, { updateHash = true, settingsSection } = {}) {
 
     if (screen === 'chats') {
         ensureChatsScreen();
+    }
+
+    // Returning to Characters always opens the list (not a leftover edit form).
+    if (screen === 'characters' && previous !== 'characters') {
+        void import('../script.js')
+            .then(({ select_rm_characters }) => {
+                if (typeof select_rm_characters === 'function') {
+                    select_rm_characters();
+                }
+            })
+            .catch(() => {
+                $('#rm_button_characters').trigger('click');
+            });
     }
 
     // Primary screen panels (excluding settings sections handled below)
@@ -614,7 +653,7 @@ export function initAppNav() {
     eventSource.on(event_types.CHAT_CHANGED, (chatId) => {
         if (chatId) {
             if (currentScreen === 'characters' || currentScreen === 'home' || currentScreen === 'chats') {
-                navigate('chat');
+                navigate('chat', { force: true });
             }
             return;
         }

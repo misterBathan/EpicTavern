@@ -166,17 +166,17 @@ export function stripTrackerPayloadFromText(text) {
         return block;
     });
 
-    // Unclosed fences (model truncated mid-tracker) — remove fence through end of message
+    // Unclosed fences (model truncated mid-tracker, or bare ```json with no body yet).
+    // Always drop trailing json/markdown fences — they are never narrative.
     result = result.replace(/```(?:json|markdown)?(?!\w)[\s\S]*$/gim, (block) => {
         // If a closing fence remains, the closed-fence pass should have handled it
         if (/```[\s\S]*```/.test(block) && block.trim().endsWith('```')) {
             return block;
         }
-        if (looksLikeTrackerText(block) || /```(?:json|markdown)?\s*\{/.test(block)) {
-            return '';
-        }
-        return block;
+        return '';
     });
+    // Bare fence marker left after a failed/partial clean
+    result = result.replace(/(?:^|\n)\s*```(?:json|markdown)?\s*$/gim, '');
 
     // Top-level raw JSON (complete or truncated) — never strip nested objects alone
     const ranges = findTopLevelJsonObjectRanges(result);

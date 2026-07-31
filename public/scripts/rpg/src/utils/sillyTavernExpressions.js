@@ -25,7 +25,6 @@ import { generateWebLlmChatPrompt, isWebLlmSupported } from '../../../extensions
 import { namesMatch } from './presentCharacters.js';
 import { normalizeImageSrc } from './imageUrls.js';
 
-const EXPRESSIONS_EXTENSION_NAME = 'expressions';
 const DEFAULT_FALLBACK_EXPRESSION = 'joy';
 const DEFAULT_LLM_PROMPT = 'Ignore previous instructions. Classify the emotion of the last message. Output just one word, e.g. "joy" or "anger". Choose only one of the following labels: {{labels}}';
 const DEFAULT_EXPRESSIONS = [
@@ -100,7 +99,8 @@ function getNormalizedExpressionsSettings() {
 }
 
 export function isExpressionsExtensionEnabled() {
-    return !stExtensionSettings.disabledExtensions?.includes(EXPRESSIONS_EXTENSION_NAME);
+    // Character Expressions are a built-in EpicTavern feature (always on).
+    return true;
 }
 
 export function getExpressionsSettingsSignature() {

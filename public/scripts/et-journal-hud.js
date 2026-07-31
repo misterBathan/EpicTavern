@@ -161,13 +161,15 @@ function colorsForStat(idOrName, stat = null) {
     ]);
     const low = String(stat?.colorLow || '').toLowerCase();
     const high = String(stat?.colorHigh || '').toLowerCase();
+    /** Soften the bright end so bars don't glow white-hot */
+    const softenHigh = (hex) => shade(hex, -0.12);
     if (stat?.colorLow && stat?.colorHigh && !legacyDark.has(low) && !legacyDark.has(high)) {
-        return { low: stat.colorLow, high: stat.colorHigh };
+        return { low: stat.colorLow, high: softenHigh(stat.colorHigh) };
     }
     if (stat?.color && !legacyDark.has(String(stat.color).toLowerCase())) {
-        return { low: shade(stat.color, -0.25), high: stat.color };
+        return { low: shade(stat.color, -0.25), high: softenHigh(stat.color) };
     }
-    return defaults;
+    return { low: defaults.low, high: softenHigh(defaults.high) };
 }
 
 /**
@@ -197,6 +199,8 @@ function barsHtml(bars) {
         const max = bar.max || 100;
         const value = Number.isFinite(bar.value) ? bar.value : 0;
         const pct = Math.max(0, Math.min(100, (value / max) * 100));
+        // Dark overlay covers the EMPTY portion from the right
+        const emptyPct = Math.max(0, Math.min(100, 100 - pct));
         const colors = colorsForStat(bar.id || bar.name, bar);
         const display = Number.isInteger(max) && max !== 100
             ? `${Math.round(value)}/${max}`
@@ -205,7 +209,7 @@ function barsHtml(bars) {
             <div class="et-rpg-bar" title="${escapeAttr(bar.name)}">
                 <div class="et-rpg-bar-label">${escapeHtml(bar.name)}</div>
                 <div class="et-rpg-bar-track" style="--et-bar-low:${colors.low};--et-bar-high:${colors.high}">
-                    <div class="et-rpg-bar-fill" style="width:${pct}%"></div>
+                    <div class="et-rpg-bar-fill" style="width:${emptyPct}%"></div>
                     <span class="et-rpg-bar-value">${display}</span>
                 </div>
             </div>
@@ -266,7 +270,16 @@ async function loadRpgModules() {
 async function refreshHud() {
     const stage = ensureStage();
     const screen = document.body.dataset.etScreen;
-    const active = screen === 'chat' && !document.body.classList.contains('et-rpg-no-active-chat');
+    let hasChat = false;
+    try {
+        const { getCurrentChatId } = await import('../script.js');
+        hasChat = !!getCurrentChatId();
+    } catch {
+        hasChat = false;
+    }
+    const active = screen === 'chat'
+        && hasChat
+        && !document.body.classList.contains('et-rpg-no-active-chat');
     stage.classList.toggle('is-active', active);
     if (!active) {
         closeFlyout();
@@ -430,7 +443,8 @@ async function refreshHud() {
 
         const wrap = document.createElement('div');
         wrap.innerHTML = cardHtml({
-            kind: 'npc',
+            // Match player card chrome (border / glow) — same visual language
+            kind: 'player',
             portrait,
             name: char.name || 'Character',
             meta: char.emoji || '',

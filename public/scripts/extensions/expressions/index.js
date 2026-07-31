@@ -99,6 +99,10 @@ let lastMessage = null;
 let spriteCache = {};
 let inApiCall = false;
 let lastServerResponseTime = 0;
+/** Prevent double-init when migrated from extension loader to core boot. */
+let expressionsInitialized = false;
+/** Character id currently open in the character editor (expressions UI). */
+let editorExpressionsChid = null;
 
 /** @type {{[characterName: string]: string}} */
 export let lastExpression = {};
@@ -619,6 +623,57 @@ function getSpriteFolderName(characterMessage = null, characterName = null) {
     }
 
     return spriteFolderName;
+}
+
+/**
+ * Avatar basename (no extension) for a character id — used for expression overrides.
+ * @param {string|number} chid
+ * @returns {string}
+ */
+function getAvatarBaseForChid(chid) {
+    const avatar = characters[chid]?.avatar;
+    if (!avatar) {
+        return '';
+    }
+    return String(avatar).replace(/\.[^/.]+$/, '');
+}
+
+/**
+ * Sprite folder for a character in the editor (override path or character name).
+ * @param {string|number} chid
+ * @returns {string}
+ */
+function getSpriteFolderForCharacter(chid) {
+    const char = characters[chid];
+    if (!char) {
+        return '';
+    }
+    const avatarBase = getAvatarBaseForChid(chid);
+    const expressionOverride = extension_settings.expressionOverrides?.find(e => e.name == avatarBase);
+    if (expressionOverride?.path) {
+        return expressionOverride.path;
+    }
+    return char.name || avatarBase;
+}
+
+/**
+ * Refresh the expressions editor UI for the character currently being edited.
+ * @param {string|number} chid
+ */
+export async function refreshExpressionsEditor(chid) {
+    editorExpressionsChid = chid;
+    const folder = getSpriteFolderForCharacter(chid);
+    const avatarBase = getAvatarBaseForChid(chid);
+
+    if (!folder) {
+        $('#open_chat_expressions').hide();
+        $('#no_chat_expressions').show();
+        return;
+    }
+
+    setExpressionOverrideHtml(true, avatarBase);
+    delete spriteCache[folder];
+    await validateImages(folder, true);
 }
 
 function getFolderNameByMessage(message) {
@@ -1171,6 +1226,10 @@ function removeExpression() {
     $('img.expression').off('error');
     $('img.expression').prop('src', '');
     $('img.expression').removeClass('default');
+    // Keep the character-edit Expressions panel visible while editing a character.
+    if (document.body.dataset.etScreen === 'characters' && editorExpressionsChid != null) {
+        return;
+    }
     $('#open_chat_expressions').hide();
     $('#no_chat_expressions').show();
 }
@@ -1188,7 +1247,7 @@ async function validateImages(spriteFolderName, forceRedrawCached = false) {
     const labels = await getExpressionsList();
 
     if (spriteCache[spriteFolderName]) {
-        if (forceRedrawCached && $('#image_list').data('name') !== spriteFolderName) {
+        if (forceRedrawCached) {
             console.debug('force redrawing character sprites list');
             await drawSpritesList(spriteFolderName, labels, spriteCache[spriteFolderName]);
         }
@@ -1603,9 +1662,11 @@ async function setExpression(spriteFolderName, expression, { force = false, over
             expressionClone.off('error');
             expressionClone.on('error', function (error) {
                 console.debug('Expression image error', spriteFile.imageSrc, error);
-                $(this).attr('src', '');
                 $(this).off('error');
-                if (force && extension_settings.expressions.showDefault) {
+                // Never blank the sprite in chat — keep the previous face visible
+                if (prevExpressionSrc) {
+                    $(this).attr('src', prevExpressionSrc);
+                } else if (force && extension_settings.expressions.showDefault) {
                     setDefaultEmojiForImage(img, expression);
                 }
             });
@@ -1653,6 +1714,13 @@ function setDefaultEmojiForImage(img, expression) {
  * @param {string} expression - The expression label to use
  */
 function setNoneForImage(img, expression) {
+    // Do not blank a visible VN/chat sprite — keep the last face on screen
+    const currentSrc = img.attr('src');
+    if (currentSrc && document.body.classList.contains('waifuMode')) {
+        img.attr('data-expression', expression);
+        img.attr('title', expression);
+        return;
+    }
     img.attr('src', '');
     img.attr('data-expression', expression);
     img.attr('data-sprite-filename', null);
@@ -1933,11 +2001,16 @@ async function onClickExpressionUpload(event) {
 async function onClickExpressionOverrideButton() {
     const context = getContext();
     const currentLastMessage = getLastCharacterMessage();
-    const avatarFileName = getFolderNameByMessage(currentLastMessage);
+    const avatarFileName = editorExpressionsChid != null
+        ? getAvatarBaseForChid(editorExpressionsChid)
+        : getFolderNameByMessage(currentLastMessage);
+    const characterName = editorExpressionsChid != null
+        ? (characters[editorExpressionsChid]?.name || avatarFileName)
+        : currentLastMessage.name;
 
     // If the avatar name couldn't be found, abort.
     if (!avatarFileName) {
-        console.debug(`Could not find filename for character with name ${currentLastMessage.name} and ID ${context.characterId}`);
+        console.debug(`Could not find filename for character with name ${characterName} and ID ${context.characterId}`);
 
         return;
     }
@@ -1964,7 +2037,7 @@ async function onClickExpressionOverrideButton() {
         } else {
             const characterOverride = { name: avatarFileName, path: overridePath };
             extension_settings.expressionOverrides.push(characterOverride);
-            delete spriteCache[currentLastMessage.name];
+            delete spriteCache[characterName];
         }
 
         console.debug(`Added/edited expression override for character with filename ${avatarFileName} to folder ${overridePath}`);
@@ -1976,11 +2049,13 @@ async function onClickExpressionOverrideButton() {
     try {
         inApiCall = true;
         $('#visual-novel-wrapper').empty();
-        await validateImages(overridePath.length === 0 ? currentLastMessage.name : overridePath, true);
-        const name = overridePath.length === 0 ? currentLastMessage.name : overridePath;
-        const expression = await getExpressionLabel(currentLastMessage.mes);
-        await sendExpressionCall(name, expression, { force: true });
-        forceUpdateVisualNovelMode();
+        const folder = overridePath.length === 0 ? characterName : overridePath;
+        await validateImages(folder, true);
+        if (currentLastMessage?.mes) {
+            const expression = await getExpressionLabel(currentLastMessage.mes);
+            await sendExpressionCall(folder, expression, { force: true });
+            forceUpdateVisualNovelMode();
+        }
     } catch (error) {
         console.debug(`Setting expression override for ${avatarFileName} failed with error: ${error}`);
     } finally {
@@ -2084,15 +2159,16 @@ async function onClickExpressionDelete(event) {
     await validateImages(name);
 }
 
-function setExpressionOverrideHtml(forceClear = false) {
-    const currentLastMessage = getLastCharacterMessage();
-    const avatarFileName = getFolderNameByMessage(currentLastMessage);
-    if (!avatarFileName) {
+function setExpressionOverrideHtml(forceClear = false, avatarFileName = null) {
+    const resolvedAvatar = avatarFileName
+        ?? (editorExpressionsChid != null ? getAvatarBaseForChid(editorExpressionsChid) : null)
+        ?? getFolderNameByMessage(getLastCharacterMessage());
+    if (!resolvedAvatar) {
         return;
     }
 
     const expressionOverride = extension_settings.expressionOverrides.find((e) =>
-        e.name == avatarFileName,
+        e.name == resolvedAvatar,
     );
 
     if (expressionOverride && expressionOverride.path) {
@@ -2167,6 +2243,24 @@ function migrateSettings() {
 }
 
 export async function init() {
+    if (expressionsInitialized) {
+        return;
+    }
+    expressionsInitialized = true;
+
+    function ensureExpressionsStylesheet() {
+        const id = 'expressions-css';
+        if (document.getElementById(id)) {
+            return;
+        }
+        const link = document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '/scripts/extensions/expressions/style.css';
+        document.head.appendChild(link);
+    }
+
     function addExpressionImage() {
         const html = `
         <div id="expression-wrapper">
@@ -2188,7 +2282,12 @@ export async function init() {
     }
     async function addSettings() {
         const template = await renderExtensionTemplateAsync(MODULE_NAME, 'settings');
-        $('#expressions_container').append(template);
+        const $host = $('#et-char-expressions-host');
+        if ($host.length) {
+            $host.append(template);
+        } else {
+            $('#expressions_container').append(template);
+        }
         $('#expression_override_button').on('click', onClickExpressionOverrideButton);
         $('#expression_upload_pack_button').on('click', onClickExpressionUploadPackButton);
         $('#expression_translate').prop('checked', extension_settings.expressions.translate).on('input', function () {
@@ -2248,6 +2347,7 @@ export async function init() {
         $('#expression_api').on('change', onExpressionApiChanged);
     }
 
+    ensureExpressionsStylesheet();
     addExpressionImage();
     addVisualNovelMode();
     migrateSettings();
@@ -2275,7 +2375,14 @@ export async function init() {
             $('#visual-novel-wrapper').empty();
         }
 
+        if (document.body.dataset.etScreen === 'characters' && editorExpressionsChid != null) {
+            refreshExpressionsEditor(editorExpressionsChid);
+        }
+
         updateFunction({ newChat: true });
+    });
+    eventSource.on(event_types.CHARACTER_EDITOR_OPENED, (chid) => {
+        refreshExpressionsEditor(chid);
     });
     eventSource.on(event_types.MOVABLE_PANELS_RESET, updateVisualNovelModeDebounced);
     eventSource.on(event_types.GROUP_UPDATED, updateVisualNovelModeDebounced);

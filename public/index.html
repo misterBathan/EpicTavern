@@ -42,6 +42,31 @@
             clip-path: none !important;
             overflow: visible !important;
         }
+        #et-app-nav .et-nav-brand,
+        #et-app-nav .et-nav-items,
+        #et-app-nav .et-nav-item {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        #et-app-nav .et-nav-brand-text {
+            display: inline !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            color: #e8dfd0 !important;
+            font-weight: 700 !important;
+        }
+        body.et-shell[data-et-screen='chat'] #etChatTopBar {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 3.25rem !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 2.85rem !important;
+            z-index: 2147482900 !important;
+        }
     </style>
     <link rel="preload" as="style" href="style.css">
     <link rel="manifest" crossorigin="use-credentials" href="manifest.json">
@@ -76,6 +101,7 @@
     <link rel="stylesheet" type="text/css" href="css/epictavern-timelines.css">
     <link rel="stylesheet" type="text/css" href="css/epictavern-memory.css">
     <link rel="stylesheet" type="text/css" href="css/epictavern-stage.css">
+    <link rel="stylesheet" type="text/css" href="css/epictavern-vn.css">
     <link rel="stylesheet" type="text/css" href="css/epictavern-settings.css">
     <link rel="stylesheet" type="text/css" href="css/user.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -5157,7 +5183,7 @@
                                     <input id="noShadowsmode" type="checkbox" />
                                     <small data-i18n="No Text Shadows">No Text Shadows</small>
                                 </label>
-                                <label for="waifuMode" class="checkbox_label" title="Reduce chat height, and put a static sprite behind the chat window." data-i18n="[title]Reduce chat height, and put a static sprite behind the chat window">
+                                <label for="waifuMode" class="checkbox_label" title="Visual Novel: large left sprite (expressions), dialogue box, History for past lines. RPG cards stay." data-i18n="[title]Visual Novel: large left sprite (expressions), dialogue box, History for past lines. RPG cards stay.">
                                     <input id="waifuMode" type="checkbox" />
                                     <small data-i18n="Waifu Mode">Visual Novel Mode</small>
                                 </label>
@@ -5834,7 +5860,7 @@
                     <div id="extensions_settings" class="flex1 wide50p">
                         <div id="assets_container" class="extension_container"></div>
                         <div id="typing_indicator_container" class="extension_container"></div>
-                        <div id="expressions_container" class="extension_container"></div>
+                        <div id="expressions_container" class="extension_container displayNone" aria-hidden="true"></div>
                         <div id="sd_container" class="extension_container"></div>
                         <div id="tts_container" class="extension_container"></div>
                         <div id="rvc_container" class="extension_container"></div>
@@ -6216,7 +6242,7 @@
                                 </div>
                             </div>
                             <small id="creators_note_desc_hidden" data-i18n="Character details are hidden.">Character details are hidden.</small>
-                            <div id="descriptionWrapper" class="flex-container flexFlowColumn flex1">
+                            <div id="descriptionWrapper" class="flex-container flexFlowColumn flex1 et-field-group">
                                 <div id="description_div" class="title_restorable">
                                     <div class="flex-container alignitemscenter">
                                         <span data-i18n="Character Description" class="mdhotkey_location">Description</span>
@@ -6238,7 +6264,7 @@
                                     <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="description_textarea" data-token-permanent="true">counting...</span>
                                 </div>
                             </div>
-                            <div id="firstMessageWrapper" class="flex-container flexFlowColumn flex1">
+                            <div id="firstMessageWrapper" class="flex-container flexFlowColumn flex1 et-field-group">
                                 <div id="first_message_div" class="title_restorable">
                                     <div class="flex-container alignitemscenter flex1">
                                         <span data-i18n="First message" class="mdhotkey_location">First message</span>
@@ -6256,6 +6282,178 @@
                                 <textarea id="firstmessage_textarea" class="mdHotkeys" data-macros data-i18n="[placeholder]This will be the first message from the character that starts every chat." placeholder="This will be the first message from the character that starts every chat." name="first_mes" placeholder=""></textarea>
                                 <div class="extension_token_counter">
                                     <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="firstmessage_textarea">counting...</span>
+                                </div>
+                            </div>
+                            <!-- Character Expressions — built-in EpicTavern (not an Extensions plugin) -->
+                            <div id="et-char-expressions" class="et-char-expressions">
+                                <div id="et-char-expressions-host"></div>
+                            </div>
+                            <!-- Advanced Definitions — inline collapsible (not a floating popup) -->
+                            <div id="et-char-advanced" class="inline-drawer et-char-advanced">
+                                <div class="inline-drawer-toggle inline-drawer-header standoutHeader">
+                                    <b>
+                                        <span data-i18n="Advanced Definitions">Advanced Definitions</span>
+                                        <small id="character_popup-button-h3" class="et-char-advanced-name"></small>
+                                    </b>
+                                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                                </div>
+                                <div id="character_popup" class="inline-drawer-content flex-container flexFlowColumn flexNoGap">
+                                    <div class="inline-drawer">
+                                        <div class="inline-drawer-toggle inline-drawer-header">
+                                            <h4>
+                                                <span data-i18n="Prompt Overrides">Prompt Overrides</span>
+                                                <small data-i18n="(For Chat Completion and Instruct Mode)">(For Chat Completion and Instruct Mode)</small>
+                                            </h4>
+                                            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                                        </div>
+                                        <div class="inline-drawer-content">
+                                            <small data-i18n="Insert {{original}} into either box to include the respective default prompt from system settings.">Insert {{original}} into either box to include the respective default prompt from system settings.</small>
+                                            <div>
+                                                <h4 class="flex-container alignItemsBaseline">
+                                                    <span data-i18n="Main Prompt">Main Prompt</span>
+                                                    <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="system_prompt_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                                </h4>
+                                                <textarea id="system_prompt_textarea" name="system_prompt" data-macros data-i18n="[placeholder]Any contents here will replace the default Main Prompt used for this character. (v2 spec: system_prompt)" placeholder="Any contents here will replace the default Main Prompt used for this character.&#10;(v2 spec: system_prompt)" form="form_create" class="text_pole" autocomplete="off" rows="3"></textarea>
+                                                <div class="extension_token_counter">
+                                                    <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="system_prompt_textarea">counting...</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 class="flex-container alignItemsBaseline">
+                                                    <span data-i18n="Post-History Instructions">Post-History Instructions</span>
+                                                    <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="post_history_instructions_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                                </h4>
+                                                <textarea id="post_history_instructions_textarea" name="post_history_instructions" data-macros data-i18n="[placeholder]Any contents here will replace the default Post-History Instructions used for this character. (v2 spec: post_history_instructions)" placeholder="Any contents here will replace the default Post-History Instructions used for this character.&#10;(v2 spec: post_history_instructions)" form="form_create" class="text_pole" autocomplete="off" rows="3"></textarea>
+                                                <div class="extension_token_counter">
+                                                    <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="post_history_instructions_textarea">counting...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inline-drawer">
+                                        <div class="inline-drawer-toggle inline-drawer-header">
+                                            <h4 data-i18n="Creator's Metadata (Not sent with the AI prompt)">
+                                                <span data-i18n="Creator's Metadata">Creator's Metadata</span>
+                                                <small data-i18n="(Not sent with the AI Prompt)">(Not sent with the AI Prompt)</small>
+                                            </h4>
+                                            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                                        </div>
+                                        <div class="inline-drawer-content">
+                                            <small data-i18n="Everything here is optional">Everything here is optional</small>
+                                            <div class="flex-container flexnowrap">
+                                                <div class="flex1">
+                                                    <h4 data-i18n="Created by">Created by</h4>
+                                                    <textarea id="creator_textarea" name="creator" data-i18n="[placeholder](Botmaker's name / Contact Info)" placeholder="(Botmaker's name / Contact info)" form="form_create" class="text_pole" autocomplete="off" rows="2"></textarea>
+                                                </div>
+                                                <div class="flex1">
+                                                    <h4 data-i18n="Character Version">Character Version</h4>
+                                                    <textarea id="character_version_textarea" name="character_version" data-i18n="[placeholder](If you want to track character versions)" placeholder="(If you want to track character versions)" form="form_create" class="text_pole" autocomplete="off" rows="2"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="flex-container flexnowrap">
+                                                <div class="flex1">
+                                                    <h4 class="flex-container alignItemsBaseline">
+                                                        <span data-i18n="Creator's Notes">Creator's Notes</span>
+                                                        <i class="editor_maximize fa-solid fa-maximize" data-for="creator_notes_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                                    </h4>
+                                                    <textarea id="creator_notes_textarea" name="creator_notes" data-i18n="[placeholder](Describe the bot, give use tips, or list the chat models it has been tested on. This will be displayed in the character list.)" placeholder="(Describe the bot, give use tips, or list the chat models it has been tested on. This will be displayed in the character list.)" form="form_create" class="text_pole" autocomplete="off" rows="4"></textarea>
+                                                </div>
+                                                <div class="flex1">
+                                                    <h4 class="flex-container alignItemsBaseline">
+                                                        <span data-i18n="Tags to Embed">Tags to Embed</span>
+                                                        <i class="editor_maximize fa-solid fa-maximize" data-for="tags_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                                    </h4>
+                                                    <textarea id="tags_textarea" name="tags" data-i18n="[placeholder](Write a comma-separated list of tags)" placeholder="(Write a comma-separated list of tags)" form="form_create" class="text_pole" autocomplete="off" rows="4"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="personality_div" class="et-field-group">
+                                        <h4 class="flex-container alignItemsBaseline et-field-label">
+                                            <span data-i18n="Personality summary">Personality summary</span>
+                                            <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="personality_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                            <a href="https://docs.sillytavern.app/usage/core-concepts/characterdesign/#personality-summary" class="notes-link" target="_blank"><span class="fa-solid fa-circle-question note-link-span"></span></a>
+                                        </h4>
+                                        <textarea id="personality_textarea" name="personality" data-macros data-i18n="[placeholder](A brief description of the personality)" placeholder="(A brief description of the personality)" form="form_create" class="text_pole" autocomplete="off" rows="4"></textarea>
+                                        <div class="extension_token_counter">
+                                            <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="personality_textarea" data-token-permanent="true">counting...</span>
+                                        </div>
+                                    </div>
+                                    <div id="scenario_div" class="et-field-group">
+                                        <h4 class="flex-container alignItemsBaseline et-field-label">
+                                            <span data-i18n="Scenario">Scenario</span>
+                                            <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="scenario_pole" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                            <a href="https://docs.sillytavern.app/usage/core-concepts/characterdesign/#scenario" class="notes-link" target="_blank">
+                                                <span class="fa-solid fa-circle-question note-link-span"></span>
+                                            </a>
+                                        </h4>
+                                        <textarea id="scenario_pole" name="scenario" data-macros data-i18n="[placeholder](Circumstances and context of the interaction)" placeholder="(Circumstances and context of the interaction)" class="text_pole" value="" autocomplete="off" form="form_create" rows="4"></textarea>
+                                        <div class="extension_token_counter">
+                                            <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="scenario_pole" data-token-permanent="true">counting...</span>
+                                        </div>
+                                    </div>
+                                    <div id="depth_prompt_div" class="flex-container et-field-group">
+                                        <div class="flex1">
+                                            <h4 class="flex-container alignItemsBaseline et-field-label">
+                                                <span data-i18n="Character's Note">
+                                                    Character's Note
+                                                </span>
+                                                <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="depth_prompt_prompt" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                            </h4>
+                                            <textarea id="depth_prompt_prompt" name="depth_prompt_prompt" data-macros class="text_pole" rows="5" autocomplete="off" form="form_create" data-i18n="[placeholder](Text to be inserted in-chat @ designated depth and role)" placeholder="(Text to be inserted in-chat @ designated depth and role)"></textarea>
+                                        </div>
+                                        <div>
+                                            <h4 class="et-field-label">
+                                                <span data-i18n="@ Depth">
+                                                    @ Depth
+                                                </span>
+                                            </h4>
+                                            <input id="depth_prompt_depth" name="depth_prompt_depth" class="text_pole textarea_compact m-t-0" type="number" min="0" max="9999" value="4" form="form_create" />
+                                            <h4 class="et-field-label">
+                                                <span data-i18n="Role">
+                                                    Role
+                                                </span>
+                                            </h4>
+                                            <select id="depth_prompt_role" name="depth_prompt_role" form="form_create" class="text_pole textarea_compact m-t-0">
+                                                <option value="system" data-i18n="System">System</option>
+                                                <option value="user" data-i18n="User">User</option>
+                                                <option value="assistant" data-i18n="Assistant">Assistant</option>
+                                            </select>
+                                            <div class="extension_token_counter">
+                                                <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="depth_prompt_prompt" data-token-permanent="true">counting...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="talkativeness_div" class="et-field-group">
+                                        <h4 class="et-field-label"><span data-i18n="Talkativeness">Talkativeness</span></h4>
+                                        <h5 data-i18n="How often the character speaks in group chats!">
+                                            <span data-i18n="How often the character speaks in">How often the character speaks in</span>&nbsp;<span class="warning" data-i18n="group chats!">group chats!</span>
+                                        </h5>
+                                        <input id="talkativeness_slider" name="talkativeness" type="range" min="0" max="1" step="0.05" value="0.5" form="form_create">
+                                        <div class="slider_hint">
+                                            <span data-i18n="Shy">Shy</span>
+                                            <span data-i18n="Normal">Normal</span>
+                                            <span data-i18n="Chatty">Chatty</span>
+                                        </div>
+                                    </div>
+                                    <div id="mes_example_div" class="flex-container flexFlowColumn et-field-group">
+                                        <div>
+                                            <h4 class="flex-container alignItemsBaseline et-field-label">
+                                                <span data-i18n="Examples of dialogue" class="mdhotkey_location">Examples of dialogue</span>
+                                                <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="mes_example_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
+                                            </h4>
+                                            <h5>
+                                                <span data-i18n="Important to set the character's writing style.">Important to set the character's writing style.</span>
+                                                <a href="https://docs.sillytavern.app/usage/core-concepts/characterdesign/#examples-of-dialogue" class="notes-link" target="_blank">
+                                                    <span class="fa-solid fa-circle-question note-link-span"></span>
+                                                </a>
+                                            </h5>
+                                        </div>
+                                        <textarea id="mes_example_textarea" class="flexGrow mdHotkeys" name="mes_example" data-macros data-i18n="[placeholder](Examples of chat dialog. Begin each example with START on a new line.)" placeholder="(Examples of chat dialog. Begin each example with &lt;START&gt; on a new line.)" form="form_create" rows="6"></textarea>
+                                        <div class="extension_token_counter">
+                                            <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="mes_example_textarea">counting...</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <!-- these divs are invisible and used for server communication purposes -->
@@ -6560,175 +6758,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="character_popup" class="flex-container flexFlowColumn flexNoGap">
-            <div id="character_popup_text">
-                <h3 id="character_popup-button-h3" class="margin0"></h3> <span data-i18n="Advanced Definitions">- Advanced
-                    Definitions</span>
-            </div>
-            <hr class="margin-bot-10px">
-            <div id="character_cross" class="fa-solid fa-circle-xmark"></div>
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <h4>
-                        <span data-i18n="Prompt Overrides">Prompt Overrides</span>
-                        <small data-i18n="(For Chat Completion and Instruct Mode)">(For Chat Completion and Instruct Mode)</small>
-                    </h4>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <small data-i18n="Insert {{original}} into either box to include the respective default prompt from system settings.">Insert {{original}} into either box to include the respective default prompt from system settings.</small>
-                    <div>
-                        <h4 class="flex-container alignItemsBaseline">
-                            <span data-i18n="Main Prompt">Main Prompt</span>
-                            <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="system_prompt_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                        </h4>
-                        <textarea id="system_prompt_textarea" name="system_prompt" data-macros data-i18n="[placeholder]Any contents here will replace the default Main Prompt used for this character. (v2 spec: system_prompt)" placeholder="Any contents here will replace the default Main Prompt used for this character.&#10;(v2 spec: system_prompt)" form="form_create" class="text_pole" autocomplete="off" rows="3"></textarea>
-                        <div class="extension_token_counter">
-                            <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="system_prompt_textarea">counting...</span>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="flex-container alignItemsBaseline">
-                            <span data-i18n="Post-History Instructions">Post-History Instructions</span>
-                            <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="post_history_instructions_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                        </h4>
-                        <textarea id="post_history_instructions_textarea" name="post_history_instructions" data-macros data-i18n="[placeholder]Any contents here will replace the default Post-History Instructions used for this character. (v2 spec: post_history_instructions)" placeholder="Any contents here will replace the default Post-History Instructions used for this character.&#10;(v2 spec: post_history_instructions)" form="form_create" class="text_pole" autocomplete="off" rows="3"></textarea>
-                        <div class="extension_token_counter">
-                            <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="post_history_instructions_textarea">counting...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <h4 data-i18n="Creator's Metadata (Not sent with the AI prompt)"><!-- This data-i18n attribute on the left is kept for backward compatibility, use the ones below when translating -->
-                        <span data-i18n="Creator's Metadata">Creator's Metadata</span>
-                        <small data-i18n="(Not sent with the AI Prompt)">(Not sent with the AI Prompt)</small>
-                    </h4>
-                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content">
-                    <small data-i18n="Everything here is optional">Everything here is optional</small>
-                    <div class="flex-container flexnowrap">
-                        <div class="flex1">
-                            <h4 data-i18n="Created by">Created by</h4>
-                            <textarea id="creator_textarea" name="creator" data-i18n="[placeholder](Botmaker's name / Contact Info)" placeholder="(Botmaker's name / Contact info)" form="form_create" class="text_pole" autocomplete="off" rows="2"></textarea>
-                        </div>
-                        <div class="flex1">
-                            <h4 data-i18n="Character Version">Character Version</h4>
-                            <textarea id="character_version_textarea" name="character_version" data-i18n="[placeholder](If you want to track character versions)" placeholder="(If you want to track character versions)" form="form_create" class="text_pole" autocomplete="off" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="flex-container flexnowrap">
-                        <div class="flex1">
-                            <h4 class="flex-container alignItemsBaseline">
-                                <span data-i18n="Creator's Notes">Creator's Notes</span>
-                                <i class="editor_maximize fa-solid fa-maximize" data-for="creator_notes_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                            </h4>
-                            <textarea id="creator_notes_textarea" name="creator_notes" data-i18n="[placeholder](Describe the bot, give use tips, or list the chat models it has been tested on. This will be displayed in the character list.)" placeholder="(Describe the bot, give use tips, or list the chat models it has been tested on. This will be displayed in the character list.)" form="form_create" class="text_pole" autocomplete="off" rows="4"></textarea>
-                        </div>
-                        <div class="flex1">
-                            <h4 class="flex-container alignItemsBaseline">
-                                <span data-i18n="Tags to Embed">Tags to Embed</span>
-                                <i class="editor_maximize fa-solid fa-maximize" data-for="tags_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                            </h4>
-                            <textarea id="tags_textarea" name="tags" data-i18n="[placeholder](Write a comma-separated list of tags)" placeholder="(Write a comma-separated list of tags)" form="form_create" class="text_pole" autocomplete="off" rows="4"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div id="personality_div">
-                <h4 class="flex-container alignItemsBaseline">
-                    <span data-i18n="Personality summary">Personality summary</span>
-                    <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="personality_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                    <a href="https://docs.sillytavern.app/usage/core-concepts/characterdesign/#personality-summary" class="notes-link" target="_blank"><span class="fa-solid fa-circle-question note-link-span"></span></a>
-                </h4>
-                <textarea id="personality_textarea" name="personality" data-macros data-i18n="[placeholder](A brief description of the personality)" placeholder="(A brief description of the personality)" form="form_create" class="text_pole" autocomplete="off" rows="4"></textarea>
-                <div class="extension_token_counter">
-                    <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="personality_textarea" data-token-permanent="true">counting...</span>
-                </div>
-            </div>
-            <div id="scenario_div">
-                <h4 class="flex-container alignItemsBaseline">
-                    <span data-i18n="Scenario">Scenario</span>
-                    <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="scenario_pole" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                    <a href="https://docs.sillytavern.app/usage/core-concepts/characterdesign/#scenario" class="notes-link" target="_blank">
-                        <span class="fa-solid fa-circle-question note-link-span"></span>
-                    </a>
-                </h4>
-                <textarea id="scenario_pole" name="scenario" data-macros data-i18n="[placeholder](Circumstances and context of the interaction)" placeholder="(Circumstances and context of the interaction)" class="text_pole" value="" autocomplete="off" form="form_create" rows="4"></textarea>
-                <div class="extension_token_counter">
-                    <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="scenario_pole" data-token-permanent="true">counting...</span>
-                </div>
-            </div>
-            <div id="depth_prompt_div" class="flex-container">
-                <div class="flex1">
-                    <h4 class="flex-container alignItemsBaseline">
-                        <span data-i18n="Character's Note">
-                            Character's Note
-                        </span>
-                        <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="depth_prompt_prompt" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                    </h4>
-                    <textarea id="depth_prompt_prompt" name="depth_prompt_prompt" data-macros class="text_pole" rows="5" autocomplete="off" form="form_create" data-i18n="[placeholder](Text to be inserted in-chat @ designated depth and role)" placeholder="(Text to be inserted in-chat @ designated depth and role)"></textarea>
-                </div>
-                <div>
-                    <h4>
-                        <span data-i18n="@ Depth">
-                            @ Depth
-                        </span>
-                    </h4>
-                    <input id="depth_prompt_depth" name="depth_prompt_depth" class="text_pole textarea_compact m-t-0" type="number" min="0" max="9999" value="4" form="form_create" />
-                    <h4>
-                        <span data-i18n="Role">
-                            Role
-                        </span>
-                    </h4>
-                    <select id="depth_prompt_role" name="depth_prompt_role" form="form_create" class="text_pole textarea_compact m-t-0">
-                        <option value="system" data-i18n="System">System</option>
-                        <option value="user" data-i18n="User">User</option>
-                        <option value="assistant" data-i18n="Assistant">Assistant</option>
-                    </select>
-                    <div class="extension_token_counter">
-                        <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="depth_prompt_prompt" data-token-permanent="true">counting...</span>
-                    </div>
-                </div>
-            </div>
-            <div id="talkativeness_div">
-                <h4><span data-i18n="Talkativeness">Talkativeness</span></h4>
-                <h5 data-i18n="How often the character speaks in group chats!"><!-- This data-i18n attribute on the left is kept for backward compatibility, use the ones below when translating -->
-                    <span data-i18n="How often the character speaks in">How often the character speaks in</span>&nbsp;<span class="warning" data-i18n="group chats!">group chats!</span>
-                </h5>
-                <input id="talkativeness_slider" name="talkativeness" type="range" min="0" max="1" step="0.05" value="0.5" form="form_create">
-                <div class="slider_hint">
-                    <span data-i18n="Shy">Shy</span>
-                    <span data-i18n="Normal">Normal</span>
-                    <span data-i18n="Chatty">Chatty</span>
-                </div>
-            </div>
-            <hr>
-            <div id="mes_example_div" class="flex-container flexFlowColumn">
-                <div>
-                    <h4 class="flex-container alignItemsBaseline">
-                        <span data-i18n="Examples of dialogue" class="mdhotkey_location">Examples of dialogue</span>
-                        <i class="editor_maximize fa-solid fa-maximize right_menu_button" data-for="mes_example_textarea" title="Expand the editor" data-i18n="[title]Expand the editor"></i>
-                    </h4>
-                    <h5>
-                        <span data-i18n="Important to set the character's writing style.">Important to set the character's writing style.</span>
-                        <a href="https://docs.sillytavern.app/usage/core-concepts/characterdesign/#examples-of-dialogue" class="notes-link" target="_blank">
-                            <span class="fa-solid fa-circle-question note-link-span"></span>
-                        </a>
-                    </h5>
-                </div>
-                <textarea id="mes_example_textarea" class="flexGrow mdHotkeys" name="mes_example" data-macros data-i18n="[placeholder](Examples of chat dialog. Begin each example with START on a new line.)" placeholder="(Examples of chat dialog. Begin each example with &lt;START&gt; on a new line.)" form="form_create" rows="6"></textarea>
-                <div class="extension_token_counter">
-                    <span data-i18n="extension_token_counter">Tokens:</span> <span data-token-counter="mes_example_textarea">counting...</span>
-                </div>
-                <!-- TODO: Example chats handhold-editor concept: https://gist.github.com/Cohee1207/50da02a4001ac1adae9b440f9b8e1079 -->
-            </div>
-            <div id="character_popup_ok" class="menu_button" data-i18n="Save">Save</div>
         </div>
 
         <div id="shadow_select_chat_popup">
@@ -7310,6 +7339,24 @@
                     <input class="ch_fav" value="" hidden />
                     <div class="ch_description"></div>
                     <div class="tags tags_inline"></div>
+                    <div class="et-char-card-actions" role="group" aria-label="Character actions">
+                        <button type="button" class="et-char-action et-char-action--chat menu_button" data-et-char-action="chat" title="Start conversation" data-i18n="[title]Start conversation">
+                            <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                            <span data-i18n="Chat">Chat</span>
+                        </button>
+                        <button type="button" class="et-char-action et-char-action--edit menu_button" data-et-char-action="edit" title="Edit character" data-i18n="[title]Edit character">
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                            <span data-i18n="Edit">Edit</span>
+                        </button>
+                        <button type="button" class="et-char-action et-char-action--dupe menu_button" data-et-char-action="duplicate" title="Duplicate character" data-i18n="[title]Duplicate character">
+                            <i class="fa-solid fa-paste" aria-hidden="true"></i>
+                            <span data-i18n="Duplicate">Duplicate</span>
+                        </button>
+                        <button type="button" class="et-char-action et-char-action--delete menu_button" data-et-char-action="delete" title="Delete character" data-i18n="[title]Delete character">
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                            <span data-i18n="Delete">Delete</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

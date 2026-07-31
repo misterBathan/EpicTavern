@@ -163,7 +163,7 @@ async function openChatRow(chat) {
                 await openCharacterChat(chat.chat_name);
             }
         }
-        navigate('chat');
+        navigate('chat', { force: true });
     } catch (error) {
         console.error('Failed to open chat from Chats screen:', error);
     }
@@ -264,7 +264,7 @@ export function ensureChatsScreen() {
 
     panel.querySelector('#et-chats-temporary')?.addEventListener('click', async () => {
         await newAssistantChat({ temporary: true });
-        navigate('chat');
+        navigate('chat', { force: true });
     });
 
     return panel;

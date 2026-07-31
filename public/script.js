@@ -289,8 +289,10 @@ import { initRpgCompanion } from './scripts/rpg/index.js';
 import { initChatTopBar } from './scripts/chat-top-bar/index.js';
 import { initTimelines } from './scripts/timelines/index.js';
 import { initMemory } from './scripts/memory/index.js';
+import { init as initExpressions } from './scripts/extensions/expressions/index.js';
 import { initEtSendFix } from './scripts/et-send-fix.js';
 import { initEtForceChrome } from './scripts/et-force-chrome.js';
+import { initEtVnMode } from './scripts/et-vn-mode.js';
 import { initAccessibility } from './scripts/a11y.js';
 import { applyStreamFadeIn } from './scripts/util/stream-fadein.js';
 import { initDomHandlers } from './scripts/dom-handlers.js';
@@ -822,6 +824,11 @@ async function firstLoadInit() {
         console.error('[EpicTavern] Memory init failed:', error);
     }
     try {
+        await initExpressions();
+    } catch (error) {
+        console.error('[EpicTavern] Expressions init failed:', error);
+    }
+    try {
         initEtSendFix();
     } catch (error) {
         console.error('[EpicTavern] Send fix init failed:', error);
@@ -830,6 +837,11 @@ async function firstLoadInit() {
         initEtForceChrome();
     } catch (error) {
         console.error('[EpicTavern] Force chrome init failed:', error);
+    }
+    try {
+        initEtVnMode();
+    } catch (error) {
+        console.error('[EpicTavern] VN mode init failed:', error);
     }
     await eventSource.emit(event_types.APP_READY);
 }
@@ -987,7 +999,7 @@ function getCharacterBlock(item, id) {
     }
     // Populate the template
     const template = $('#character_template .character_select').clone();
-    template.attr({ 'data-chid': id, 'id': `CharID${id}` });
+    template.attr({ 'data-chid': id, 'id': `CharID${id}`, 'data-avatar': item.avatar || '' });
     template.find('img').attr('src', this_avatar).attr('alt', item.name);
     template.find('.avatar').attr('title', `[Character] ${item.name}\nFile: ${item.avatar}`);
     template.find('.ch_name').text(item.name).attr('title', `[Character] ${item.name}`);
@@ -1024,6 +1036,48 @@ function getCharacterBlock(item, id) {
 
     // Add to the list
     return template;
+}
+
+/**
+ * Open character edit on the Characters screen without starting a chat.
+ * @param {number} id
+ */
+async function openCharacterEditFromList(id) {
+    if (characters[id] === undefined) {
+        return;
+    }
+    if (isChatSaving) {
+        toastr.info(t`Please wait until the chat is saved before switching characters.`, t`Your chat is still saving...`);
+        return;
+    }
+    setCharacterId(id);
+    await unshallowCharacter(this_chid);
+    selected_button = 'character_edit';
+    select_selected_character(this_chid, { switchMenu: true });
+}
+
+/**
+ * Start (or resume) a conversation with a character and go to Chat.
+ * @param {number} id
+ */
+async function startCharacterConversationFromList(id) {
+    if (characters[id] === undefined) {
+        return;
+    }
+    // Edit can set this_chid without calling getChat(). selectCharacterById then
+    // takes the "already selected" branch and skips loading — leave Chat empty
+    // with welcome/VN chrome. Force the full load path whenever opening Chat.
+    if (String(this_chid) === String(id)) {
+        setCharacterId(undefined);
+        setCharacterName('');
+    }
+    await selectCharacterById(id, { switchMenu: false });
+    if (!getCurrentChatId()) {
+        toastr.warning(t`Could not open a chat for this character.`, t`Chat`);
+        navigateEtScreen('chats');
+        return;
+    }
+    navigateEtScreen('chat', { force: true });
 }
 
 /**
@@ -8897,7 +8951,7 @@ function select_rm_create({ switchMenu = true } = {}) {
     $('#character_open_media_overrides').hide();
 }
 
-function select_rm_characters() {
+export function select_rm_characters() {
     const doFullRefresh = menu_type === 'characters';
     setMenuType('characters');
     selectRightMenuWithAnimation('rm_characters_block');
@@ -11229,9 +11283,54 @@ jQuery(async function () {
         $('#character_search_bar').val('').trigger('input');
     });
 
-    $(document).on('click', '.character_select', async function () {
+    $(document).on('click', '.character_select', async function (e) {
+        // Action buttons handle themselves
+        if ($(e.target).closest('.et-char-action, .et-char-card-actions').length) {
+            return;
+        }
         const id = Number($(this).attr('data-chid'));
+        // Characters screen: card body opens edit (not chat)
+        if (document.body.dataset.etScreen === 'characters') {
+            await openCharacterEditFromList(id);
+            return;
+        }
         await selectCharacterById(id);
+    });
+
+    $(document).on('click', '.et-char-action', async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const $btn = $(this);
+        const $card = $btn.closest('.character_select');
+        const id = Number($card.attr('data-chid'));
+        const action = String($btn.attr('data-et-char-action') || '');
+        if (!Number.isFinite(id) || characters[id] === undefined) {
+            return;
+        }
+        const item = characters[id];
+
+        if (action === 'chat') {
+            await startCharacterConversationFromList(id);
+            return;
+        }
+        if (action === 'edit') {
+            await openCharacterEditFromList(id);
+            return;
+        }
+        if (action === 'duplicate') {
+            await duplicateCharacter({ avatar: item.avatar });
+            return;
+        }
+        if (action === 'delete') {
+            let deleteChats = false;
+            const confirm = await Popup.show.confirm(t`Delete the character?`, await renderTemplateAsync('deleteConfirm'), {
+                onClose: () => { deleteChats = !!$('#del_char_checkbox').prop('checked'); },
+            });
+            if (!confirm) {
+                return;
+            }
+            await deleteCharacter(item.avatar, { deleteChats });
+        }
     });
 
     $(document).on('click', '.bogus_folder_select', function () {
@@ -11366,33 +11465,29 @@ jQuery(async function () {
     });
 
     $('#advanced_div').on('click', function () {
-        if (!is_advanced_char_open) {
+        const $drawer = $('#et-char-advanced');
+        const $content = $drawer.find('> .inline-drawer-content');
+        const $icon = $drawer.find('> .inline-drawer-header .inline-drawer-icon');
+        const opening = !$content.is(':visible');
+        if (opening) {
+            $content.stop(true, true).slideDown(animation_duration);
+            $icon.removeClass('down').addClass('up');
             is_advanced_char_open = true;
-            $('#character_popup').css({ 'display': 'flex', 'opacity': 0.0 }).addClass('open');
-            $('#character_popup').transition({
-                opacity: 1.0,
-                duration: animation_duration,
-                easing: animation_easing,
-            });
+            setTimeout(() => {
+                document.getElementById('et-char-advanced')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 40);
         } else {
+            $content.stop(true, true).slideUp(animation_duration);
+            $icon.removeClass('up').addClass('down');
             is_advanced_char_open = false;
-            $('#character_popup').css('display', 'none').removeClass('open');
         }
     });
 
-    $('#character_cross').on('click', function () {
+    // Legacy stubs — Advanced Definitions is inline now (no floating popup)
+    $('#character_cross, #character_popup_ok').on('click', function () {
         is_advanced_char_open = false;
-        $('#character_popup').transition({
-            opacity: 0,
-            duration: animation_duration,
-            easing: animation_easing,
-        });
-        setTimeout(function () { $('#character_popup').css('display', 'none'); }, animation_duration);
-    });
-
-    $('#character_popup_ok').on('click', function () {
-        is_advanced_char_open = false;
-        $('#character_popup').css('display', 'none');
+        $('#et-char-advanced > .inline-drawer-content').slideUp(animation_duration);
+        $('#et-char-advanced > .inline-drawer-header .inline-drawer-icon').removeClass('up').addClass('down');
     });
 
     $('#dialogue_popup_ok').on('click', async function (_e) {

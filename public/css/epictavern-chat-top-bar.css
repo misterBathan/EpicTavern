@@ -42,7 +42,9 @@ body.et-shell[data-et-screen='chat'] #etChatTopBarSideBar {
 #etChatTopBarTimeline,
 #etChatTopBarJournal,
 #etChatTopBarMemory,
-#etChatTopBarRpgConfig {
+#etChatTopBarRpgConfig,
+#etChatTopBarVisualNovel,
+#etChatTopBarVnHistory {
     margin-left: 0.15rem;
 }
 
@@ -111,6 +113,20 @@ body.et-shell #etChatTopBarSideBar .sideBarItem:hover {
 body.et-shell #etChatTopBarSideBar .sideBarItem.selected {
     border-color: var(--et-edge-strong) !important;
     background: rgba(196, 163, 90, 0.14) !important;
+}
+
+body.et-shell #etChatTopBarVnHistory {
+    display: none !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #etChatTopBarVnHistory {
+    display: inline-flex !important;
+}
+
+body.et-shell.waifuMode[data-et-screen='chat'] #etChatTopBarVisualNovel {
+    color: var(--et-brass-soft) !important;
+    border-color: rgba(196, 163, 90, 0.35) !important;
+    background: rgba(196, 163, 90, 0.12) !important;
 }
 
 body.et-shell #etChatTopBarChatName {
